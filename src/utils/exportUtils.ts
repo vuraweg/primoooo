@@ -37,11 +37,11 @@ const createPDFConfig = (options: ExportOptions) => ({
     afterName: 0,
     afterContact: 3,
     sectionSpacingBefore: options.sectionSpacing, // Space before section title
-    sectionSpacingAfter: 3, // Space after section underline
-    bulletListSpacing: options.entrySpacing * 0.5, // Reduced to minimize space between bullets
-    afterSubsection: 4, // Space between sub-sections (e.g., jobs, projects)
-    lineHeight: 1.2, // Tighter line height
-    bulletIndent: 4,
+    sectionSpacingAfter: 2, // Space after section underline
+    bulletListSpacing: options.entrySpacing * 0.3, // Reduced to minimize space between bullets
+    afterSubsection: 2, // Space between sub-sections (e.g., jobs, projects)
+    lineHeight: 1.0, // Tighter line height
+    bulletIndent: 3,
     entrySpacing: options.entrySpacing
   },
   colors: {
