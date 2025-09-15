@@ -9,7 +9,7 @@ export const ThemeToggle: React.FC = () => {
     <button
       onClick={toggleTheme}
       aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
-      className="p-2 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
+      className="p-2 rounded-full transition-colors duration-300 focus:outline-none"
     >
       {isDarkMode ? (
         // In dark mode, show a larger Sun icon to switch to light mode
