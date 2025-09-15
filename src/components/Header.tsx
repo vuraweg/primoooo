@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
                       console.log('Profile button clicked. Current showUserMenu:', showUserMenu, 'New state:', !showUserMenu);
                       setShowUserMenu(!showUserMenu);
                     }}
-                    className="flex items-center space-x-3 bg-gradient-to-r from-secondary-50 to-secondary-100 hover:from-secondary-100 hover:to-secondary-200 rounded-xl px-4 py-2.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-neon-cyan-500 border border-secondary-200 shadow-sm min-h-touch dark:from-dark-200 dark:to-dark-300 dark:hover:from-dark-300 dark:hover:to-dark-400 dark:border-dark-400"
+                    className="flex items-center space-x-3 bg-gradient-to-r from-secondary-50 to-secondary-100 hover:from-secondary-100 hover:to-secondary-200 rounded-full px-4 py-1 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-neon-cyan-500 border border-secondary-200 shadow-sm  dark:from-dark-200 dark:to-dark-300 dark:hover:from-dark-300 dark:hover:to-dark-400 dark:border-dark-400"
                   >
                     <div className="bg-gradient-to-br from-neon-cyan-500 to-neon-blue-500 w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
                       {getUserInitials()}
