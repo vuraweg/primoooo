@@ -124,11 +124,9 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                     <div className="text-left">
                       <p className="text-sm font-semibold text-secondary-900 dark:text-gray-100">
-                        {getGreeting()}, {getUserDisplayName()}!
+                         {getUserDisplayName()}!
                       </p>
-                      <p className="text-xs text-secondary-500 dark:text-gray-400 truncate max-w-[150px]">
-                        {user.email}
-                      </p>
+                     
                     </div>
                   </button>
 
