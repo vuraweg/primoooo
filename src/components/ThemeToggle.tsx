@@ -16,7 +16,7 @@ export const ThemeToggle: React.FC = () => {
         <Sun className="w-10 h-10 text-yellow-500" />
       ) : (
         // In light mode, show a larger Moon icon to switch to dark mode
-        <Moon className="w-10 h-10 text-black" />
+        <Moon className="w-9 h-9 text-black" />
       )}
     </button>
   );
