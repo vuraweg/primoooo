@@ -1,3 +1,5 @@
+// src/types/resume.ts
+
 interface Education {
   degree: string;
   school: string;
@@ -25,6 +27,12 @@ interface Skill {
   list: string[];
 }
 
+// New interface for structured certifications
+export interface Certification {
+  title: string;
+  description: string;
+}
+
 export interface ResumeData {
   name: string;
   phone: string;
@@ -39,7 +47,8 @@ export interface ResumeData {
   workExperience: WorkExperience[];
   projects: Project[];
   skills: Skill[];
-  certifications: string[];
+  // Updated to allow for both simple strings and structured Certification objects
+  certifications: (string | Certification)[];
   achievements?: string[]; // For freshers - awards, achievements
   extraCurricularActivities?: string[]; // For freshers - activities, leadership
   languagesKnown?: string[]; // For freshers - languages spoken
