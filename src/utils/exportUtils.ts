@@ -102,8 +102,9 @@ const isValidField = (
 
   switch (fieldType) {
     case 'phone': {
+      // Looser validation for phone numbers: just check for at least 7 digits
       const digitCount = (field.match(/\d/g) || []).length;
-      return digitCount > 6;
+      return digitCount >= 7;
     }
     case 'email':
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field);
@@ -270,9 +271,15 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
   ) => {
     const safeFieldValue = toSafeText(fieldValue);
     if (!safeFieldValue) return;
-    const parts = safeFieldValue.split(/[,|]/).map((p) => p.trim());
-    const valids = parts.filter((p) => isValidField(p, fieldType));
-    if (valids.length > 0) contactParts.push(valids.join(' | '));
+
+    let processedValue = safeFieldValue;
+    if (fieldType === 'url' && !safeFieldValue.startsWith('http')) {
+      processedValue = `https://${safeFieldValue}`; // Prepend https if missing
+    }
+    
+    if (isValidField(processedValue, fieldType)) {
+      contactParts.push(processedValue);
+    }
   };
 
   add(resumeData.location, 'text');
@@ -328,6 +335,11 @@ function drawWorkExperience(
     // Right-aligned year
     safeSetFont(state.doc, PDF_CONFIG.fontFamily, 'bold');
     state.doc.setFontSize(PDF_CONFIG.fonts.year.size);
+    state.doc.setTextColor(
+      PDF_CONFIG.colors.primary[0],
+      PDF_CONFIG.colors.primary[1],
+      PDF_CONFIG.colors.primary[2]
+    );
     const yearWidth = safeGetTextWidth(state.doc, yearText);
     const yearX = PDF_CONFIG.margins.left + PDF_CONFIG.contentWidth - yearWidth;
     const yearY = initialY + PDF_CONFIG.fonts.jobTitle.size * PT_TO_MM * 0.5;
@@ -831,20 +843,14 @@ const generateWordHTMLContent = (
   ) => {
     const safeFieldValue = toSafeText(fieldValue);
     if (!safeFieldValue) return;
-    const parts = safeFieldValue.split(/[,|]/).map((p) => p.trim());
-    const validParts = parts.filter((p) => isValidField(p, fieldType));
-    if (validParts.length > 0) {
-      const content = validParts
-        .map((part) => {
-          if (linkType === 'tel')
-            return `<a href="tel:${part}" style="color: #2563eb !important; text-decoration: underline !important;">${part}</a>`;
-          if (linkType === 'mailto')
-            return `<a href="mailto:${part}" style="color: #2563eb !important; text-decoration: underline !important;">${part}</a>`;
-          if (linkType === 'http')
-            return `<a href="${part}" target="_blank" rel="noopener noreferrer" style="color: #2563eb !important; text-decoration: underline !important;">${part}</a>`;
-          return part;
-        })
-        .join(' | ');
+
+    let processedValue = safeFieldValue;
+    if (fieldType === 'url' && !safeFieldValue.startsWith('http')) {
+      processedValue = `https://${safeFieldValue}`; // Prepend https if missing
+    }
+
+    if (isValidField(processedValue, fieldType)) {
+      const content = `<a href="${linkType === 'tel' ? 'tel:' : linkType === 'mailto' ? 'mailto:' : ''}${processedValue}" ${linkType === 'http' ? 'target="_blank" rel="noopener noreferrer"' : ''} style="color: #2563eb !important; text-decoration: underline !important;">${processedValue}</a>`;
       contactParts.push(`<b>${label}:</b> <b>${content}</b>`);
     }
   };
@@ -1144,7 +1150,7 @@ const generateWordHTMLContent = (
         .job-title, .degree { font-size: 9.5pt !important; font-weight: bold !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .company, .school, .year { font-size: 9.5pt !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .bullets { margin-left: 4mm !important; margin-bottom: 4pt !important; margin-top: 2pt !important; }
-        .bullet { font-size: 9.5pt !important; line-height: 1.4 !important; margin: 0 0 1pt 0 !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
+        .bullet { font-size: 9.5pt !important; line-height: 1.4 !important; margin: 0 0 2pt 0 !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .skills-item { font-size: 9.5pt !important; margin: 0.5pt 0 !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .skill-category { font-weight: bold !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .project-title { font-size: 9.5pt !important; font-weight: bold !important; margin-bottom: 2pt !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
