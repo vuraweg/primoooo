@@ -318,8 +318,8 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
 
     // Add space between jobs (except for the last one)
     if (index < workExperience.length - 1) {
-      state.currentY += PDF_CONFIG.spacing.afterSubsection;
-      totalHeight += PDF_CONFIG.spacing.afterSubsection;
+      state.currentY += 1;
+      totalHeight += 1;
     }
   });
 
@@ -391,8 +391,8 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
     totalHeight += degreeHeight + schoolHeight + cgpaHeight;
 
     if (index < education.length - 1) {
-      state.currentY += 3;
-      totalHeight += PDF_CONFIG.spacing.afterSubsection;
+      state.currentY += 1;
+      totalHeight += 1;
     }
   });
 
@@ -835,7 +835,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">EDUCATION</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.education.map(edu => `
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 6pt;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 2pt;">
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
               <div class="degree" style="font-size: 9.5pt; font-weight: bold; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.degree}</div>
@@ -858,7 +858,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${userType === 'fresher' ? 'WORK EXPERIENCE' : 'EXPERIENCE'}</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.workExperience.map(job => `
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 2pt;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 1pt;">
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
               <div class="job-title" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><b style="font-weight: bold;">${job.role}</b> | ${job.company}${job.location ? `, ${job.location}` : ''}</div>
