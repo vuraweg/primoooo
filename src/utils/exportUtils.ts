@@ -601,55 +601,25 @@ function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: an
   return totalHeight;
 }
 
-// Draw achievements/extras for fresher
+// MODIFIED: Simplified to only draw achievements
 function drawAchievementsAndExtras(state: PageState, resumeData: ResumeData, PDF_CONFIG: any): number {
   const hasAchievements = resumeData.achievements && resumeData.achievements.length > 0;
-  const hasExtraCurricular = resumeData.extraCurricularActivities && resumeData.extraCurricularActivities.length > 0;
-  const hasLanguages = resumeData.languagesKnown && resumeData.languagesKnown.length > 0;
-  const hasPersonalDetails = resumeData.personalDetails && resumeData.personalDetails.trim() !== '';
+  if (!hasAchievements) return 0;
 
-  if (!hasAchievements && !hasExtraCurricular && !hasLanguages && !hasPersonalDetails) return 0;
+  let totalHeight = drawSectionTitle(state, 'ACHIEVEMENTS', PDF_CONFIG);
 
-  let totalHeight = drawSectionTitle(state, 'ACHIEVEMENTS & EXTRAS', PDF_CONFIG);
+  resumeData.achievements.forEach(item => {
+    if (!checkPageSpace(state, 10, PDF_CONFIG)) {
+      addNewPage(state, PDF_CONFIG);
+    }
+    const itemHeight = drawText(state, `• ${item}`, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
+      fontSize: PDF_CONFIG.fonts.body.size,
+      maxWidth: PDF_CONFIG.contentWidth - PDF_CONFIG.spacing.bulletIndent
+    });
+    totalHeight += itemHeight;
+  });
 
-  const addItems = (title: string, items: string[] | undefined) => {
-      if (items && items.length > 0) {
-          if (!checkPageSpace(state, 10, PDF_CONFIG)) { addNewPage(state, PDF_CONFIG); }
-          drawText(state, title, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
-            fontSize: PDF_CONFIG.fonts.body.size,
-            fontWeight: 'bold',
-            color: PDF_CONFIG.colors.secondary
-          });
-          items.forEach(item => {
-            const itemHeight = drawText(state, `• ${item}`, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent * 1.5, PDF_CONFIG, {
-                fontSize: PDF_CONFIG.fonts.body.size,
-                maxWidth: PDF_CONFIG.contentWidth - PDF_CONFIG.spacing.bulletIndent * 1.5
-            });
-            totalHeight += itemHeight;
-          });
-          state.currentY += 2; // Small space after each sub-list
-      }
-  };
-
-  addItems('Achievements:', resumeData.achievements);
-  addItems('Extra-curricular Activities:', resumeData.extraCurricularActivities);
-  addItems('Languages Known:', resumeData.languagesKnown);
-
-  if (hasPersonalDetails) {
-      if (!checkPageSpace(state, 10, PDF_CONFIG)) { addNewPage(state, PDF_CONFIG); }
-      drawText(state, 'Personal Details:', PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
-          fontSize: PDF_CONFIG.fonts.body.size,
-          fontWeight: 'bold',
-          color: PDF_CONFIG.colors.secondary
-      });
-      const personalDetailsHeight = drawText(state, resumeData.personalDetails, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent * 1.5, PDF_CONFIG, {
-          fontSize: PDF_CONFIG.fonts.body.size,
-          maxWidth: PDF_CONFIG.contentWidth - PDF_CONFIG.spacing.bulletIndent * 1.5
-      });
-      totalHeight += personalDetailsHeight;
-      state.currentY += 2;
-  }
-
+  state.currentY += 2; // Small space after the list
   return totalHeight;
 }
 
@@ -971,32 +941,14 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
     </div>
   ` : '';
 
-  const achievementsAndExtrasHtml = userType === 'fresher' && (data.achievements?.length > 0 || data.extraCurricularActivities?.length > 0 || data.languagesKnown?.length > 0 || data.personalDetails?.trim() !== '') ? `
+  // MODIFIED: Simplified to only handle achievements
+  const achievementsHtml = data.achievements && data.achievements.length > 0 ? `
     <div style="margin-top: 10pt;">
-      <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">ACHIEVEMENTS & EXTRAS</div>
+      <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">ACHIEVEMENTS</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
-      ${data.achievements && data.achievements.length > 0 ? `
-        <p style="font-size: 9.5pt; font-weight: bold; margin: 6pt 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Achievements:</p>
-        <ul class="bullets" style="margin-left: 7.5mm; margin-bottom: 6pt; margin-top: 2pt; list-style-type: disc;">
-          ${data.achievements.map(item => `<li class="bullet" style="font-size: 9.5pt; line-height: 1.4; margin: 0 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${item}</li>`).join('')}
-        </ul>
-      ` : ''}
-      ${data.extraCurricularActivities && data.extraCurricularActivities.length > 0 ? `
-        <p style="font-size: 9.5pt; font-weight: bold; margin: 6pt 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Extra-curricular Activities:</p>
-        <ul class="bullets" style="margin-left: 7.5mm; margin-bottom: 6pt; margin-top: 2pt; list-style-type: disc;">
-          ${data.extraCurricularActivities.map(item => `<li class="bullet" style="font-size: 9.5pt; line-height: 1.4; margin: 0 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${item}</li>`).join('')}
-        </ul>
-      ` : ''}
-      ${data.languagesKnown && data.languagesKnown.length > 0 ? `
-        <p style="font-size: 9.5pt; font-weight: bold; margin: 6pt 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Languages Known:</p>
-        <ul class="bullets" style="margin-left: 7.5mm; margin-bottom: 6pt; margin-top: 2pt; list-style-type: disc;">
-          ${data.languagesKnown.map(item => `<li class="bullet" style="font-size: 9.5pt; line-height: 1.4; margin: 0 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${item}</li>`).join('')}
-        </ul>
-      ` : ''}
-      ${data.personalDetails?.trim() !== '' ? `
-        <p style="font-size: 9.5pt; font-weight: bold; margin: 6pt 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Personal Details:</p>
-        <p style="font-size: 9.5pt; line-height: 1.4; margin: 0 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-left: 7.5mm;">${data.personalDetails}</p>
-      ` : ''}
+      <ul class="bullets" style="margin-left: 7.5mm; margin-bottom: 6pt; margin-top: 2pt; list-style-type: disc;">
+        ${data.achievements.map(item => `<li class="bullet" style="font-size: 9.5pt; line-height: 1.4; margin: 0 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${item}</li>`).join('')}
+      </ul>
     </div>
   ` : '';
 
@@ -1019,7 +971,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       ${projectsHtml}
       ${workExperienceHtml}
       ${certificationsHtml}
-      ${achievementsAndExtrasHtml}
+      ${achievementsHtml}
     `;
   } else if (userType === 'experienced') {
     sectionOrderHtml = `
@@ -1038,7 +990,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       ${projectsHtml}
       ${skillsHtml}
       ${certificationsHtml}
-      ${achievementsAndExtrasHtml}
+      ${achievementsHtml}
     `;
   }
 
@@ -1184,4 +1136,4 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
     </body>
     </html>
   `;
-}; 
+};
