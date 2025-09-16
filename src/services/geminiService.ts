@@ -198,7 +198,7 @@ JSON Structure:
   "skills": [
     {"category": "...", "count": 0, "list": ["...", "..."]}
   ],
-  "certifications": ["...", "..."],
+  "certifications": [{"title": "...", "description": "..."}, "..."],
   ${userType === 'fresher' || userType === 'student' ? `
   "achievements": ["...", "..."],
   "extraCurricularActivities": ["...", "..."],
