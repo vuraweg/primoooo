@@ -52,10 +52,10 @@ const createPDFConfig = (options: ExportOptions) => ({
 
   fonts: {
     name: { size: options.nameSize, weight: 'bold' as const },
-    contact: { size: options.bodyTextSize - 0.5, weight: 'normal' as const },
+    contact: { size: options.bodyTextSize - 0.5, weight: 'bold' as const },
     sectionTitle: { size: options.sectionHeaderSize, weight: 'bold' as const },
     jobTitle: { size: options.subHeaderSize, weight: 'bold' as const },
-    company: { size: options.subHeaderSize, weight: 'normal' as const },
+    company: { size: options.subHeaderSize, weight: 'bold' as const },
     year: { size: options.subHeaderSize, weight: 'normal' as const },
     body: { size: options.bodyTextSize, weight: 'normal' as const },
   },
@@ -840,7 +840,7 @@ const generateWordHTMLContent = (
           return part;
         })
         .join(' | ');
-      contactParts.push(`<b>${label}:</b> ${content}`);
+      contactParts.push(`<b>${label}:</b> <b>${content}</b>`);
     }
   };
 
@@ -916,9 +916,9 @@ const generateWordHTMLContent = (
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 1pt;">
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
-              <div class="job-title" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><b style="font-weight: bold;">${
+              <div class="job-title" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><b>${
                 job.role || ''
-              }</b> | ${job.company || ''}${isValidField(job.location) ? `, ${job.location}` : ''}</div>
+              }</b> | <b>${job.company || ''}</b>${isValidField(job.location) ? `, ${job.location}` : ''}</div>
             </td>
             <td style="padding: 0; vertical-align: top; text-align: right; white-space: nowrap;">
               <div class="year" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold;">${
