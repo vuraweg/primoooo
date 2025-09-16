@@ -291,6 +291,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                     </div>
                     <div style={{
                       fontSize: exportOptions ? `${ptToPx(exportOptions.subHeaderSize)}px` : '12.67px',
+                      fontWeight: 'bold',
                       fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
                     }}>
                       {edu.school}{edu.location ? `, ${edu.location}` : ''}
@@ -564,13 +565,16 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
       paperSize === 'letter' ? 'resume-letter' : 'resume-a4'
     }`}>
       <div
-        className="pt-4 px-4 pb-6 sm:pt-6 sm:px-6 sm:pb-8 lg:px-8 max-h-[70vh] sm:max-h-[80vh] lg:max-h-[800px] overflow-y-auto dark:bg-dark-100"
+        className="max-h-[70vh] sm:max-h-[80vh] lg:max-h-[800px] overflow-y-auto dark:bg-dark-100"
         style={{
           fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
           fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize)}px` : '12.67px',
           lineHeight: '1.25', /* PDF_CONFIG.spacing.lineHeight */
           color: 'inherit',
-          padding: exportOptions?.layoutType === 'compact' ? '12px' : '15px'
+          marginTop: exportOptions?.margins?.top ? `${mmToPx(exportOptions.margins.top)}px` : '15px',
+          marginBottom: exportOptions?.margins?.bottom ? `${mmToPx(exportOptions.margins.bottom)}px` : '15px',
+          marginLeft: exportOptions?.margins?.left ? `${mmToPx(exportOptions.margins.left)}px` : '20px',
+          marginRight: exportOptions?.margins?.right ? `${mmToPx(exportOptions.margins.right)}px` : '20px',
         }}
       >
         {/* Header */}
