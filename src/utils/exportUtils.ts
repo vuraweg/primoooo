@@ -622,13 +622,6 @@ function drawAchievementsAndExtras(state: PageState, resumeData: ResumeData, PDF
 export const exportToPDF = async (resumeData: ResumeData, userType: UserType = 'experienced', options: ExportOptions = defaultExportOptions): Promise<void> => {
   const PDF_CONFIG = createPDFConfig(options);
 
-  // Format filename with role if available
-  const getFileName = (data: ResumeData, fileExtension: 'pdf' | 'doc') => {
-    const namePart = data.name.replace(/\s+/g, '_');
-    const rolePart = data.targetRole ? `_${data.targetRole.replace(/\s+/g, '_')}` : ''; // Re-added rolePart logic
-    return `${namePart}${rolePart}.${fileExtension}`; // Reverted to include rolePart
-  };
-
   try {
     if (isMobileDevice()) {
       console.log('Starting PDF generation for mobile device...');
@@ -641,14 +634,9 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
       compress: true
     });
 
-    // Add Calibri font (assuming it's loaded or provided by default)
-    // You might need to add: doc.addFont('Calibri', 'Calibri', 'normal');
-    // and doc.addFont('Calibri', 'Calibri', 'bold');
-    // if not already configured for jsPDF.
-
     const state: PageState = {
       currentPage: 1,
-      currentY: PDF_CONFIG.margins.top, // Start Y at top margin
+      currentY: PDF_CONFIG.margins.top,
       doc
     };
 
@@ -660,8 +648,7 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
       producer: 'Resume Optimizer PDF Generator'
     });
 
-    // Draw header (name)
-    state.currentY = PDF_CONFIG.spacing.nameFromTop; // Start name lower for better top margin
+    state.currentY = PDF_CONFIG.spacing.nameFromTop;
     drawText(state, resumeData.name.toUpperCase(), PDF_CONFIG.margins.left, PDF_CONFIG, {
       fontSize: PDF_CONFIG.fonts.name.size,
       fontWeight: PDF_CONFIG.fonts.name.weight,
@@ -669,38 +656,34 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
     });
     state.currentY += PDF_CONFIG.spacing.afterName;
 
-    // Draw contact information
     drawContactInfo(state, resumeData, PDF_CONFIG);
 
     // MODIFIED: Remove separator line
     // const separatorY = state.currentY;
-    // doc.setDrawColor(0, 0, 0); // Dark gray
+    // doc.setDrawColor(0, 0, 0);
     // doc.setLineWidth(0.4);
     // doc.line(
-    //   PDF_CONFIG.margins.left, // Start from left margin
+    //   PDF_CONFIG.margins.left,
     //   separatorY,
-    //   PDF_CONFIG.pageWidth - PDF_CONFIG.margins.right, // End at right margin
+    //   PDF_CONFIG.pageWidth - PDF_CONFIG.margins.right,
     //   separatorY
     // );
-    state.currentY += 3; // Space after separator line
+    state.currentY += 3;
 
-    // Conditional rendering of Professional Summary based on userType and content
     if (resumeData.summary && resumeData.summary.trim() !== '') {
       drawProfessionalSummary(state, resumeData.summary, PDF_CONFIG);
     }
 
-    // Draw career objective for students
     if (userType === 'student' && resumeData.careerObjective && resumeData.careerObjective.trim() !== '') {
       drawCareerObjective(state, resumeData.careerObjective, PDF_CONFIG);
     }
 
-    // Draw sections based on user type and presence of data
     if (userType === 'experienced') {
         drawWorkExperience(state, resumeData.workExperience, userType, PDF_CONFIG);
         drawProjects(state, resumeData.projects, PDF_CONFIG);
         drawSkills(state, resumeData.skills, PDF_CONFIG);
         drawCertifications(state, resumeData.certifications, PDF_CONFIG);
-        drawEducation(state, resumeData.education, PDF_CONFIG); // Education is often last for experienced
+        drawEducation(state, resumeData.education, PDF_CONFIG);
     } else if (userType === 'student') {
         drawEducation(state, resumeData.education, PDF_CONFIG);
         drawSkills(state, resumeData.skills, PDF_CONFIG);
@@ -710,17 +693,13 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
         drawAchievementsAndExtras(state, resumeData, PDF_CONFIG);
     } else { // Fresher
         drawEducation(state, resumeData.education, PDF_CONFIG);
-        drawWorkExperience(state, resumeData.workExperience, userType, PDF_CONFIG); // Internships and work experience
+        drawWorkExperience(state, resumeData.workExperience, userType, PDF_CONFIG);
         drawProjects(state, resumeData.projects, PDF_CONFIG);
         drawSkills(state, resumeData.skills, PDF_CONFIG);
         drawCertifications(state, resumeData.certifications, PDF_CONFIG);
-        drawAchievementsAndExtras(state, resumeData, PDF_CONFIG); // Combined section for fresher extras
+        drawAchievementsAndExtras(state, resumeData, PDF_CONFIG);
     }
 
-    // Removed the call to drawGitHubReferences(state, resumeData.projects); as per requirement.
-
-
-    // Add page numbers to all pages (only if multiple pages)
     const totalPages = state.currentPage;
     if (totalPages > 1) {
       for (let i = 1; i <= totalPages; i++) {
@@ -731,15 +710,14 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
         const pageText = `Page ${i} of ${totalPages}`;
         doc.setFont(PDF_CONFIG.fontFamily, 'normal');
         doc.setFontSize(9);
-        doc.setTextColor(80, 80, 80); // Gray
+        doc.setTextColor(80, 80, 80);
 
         const textWidth = doc.getTextWidth(pageText);
-        // Position page number at the bottom, centered
         doc.text(pageText, PDF_CONFIG.pageWidth / 2 - textWidth / 2, PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom / 2);
       }
     }
 
-    const fileName = getFileName(resumeData, 'pdf'); // Pass resumeData and 'pdf' extension
+    const fileName = getFileName(resumeData, 'pdf');
 
     if (isMobileDevice()) {
       const pdfBlob = doc.output('blob');
@@ -750,7 +728,6 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
 
   } catch (error) {
     console.error('Error exporting to PDF:', error);
-
     if (error instanceof Error) {
       if (error.message.includes('jsPDF')) {
         throw new Error('PDF generation failed. Please try again or contact support if the issue persists.');
@@ -766,13 +743,12 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
 // Centralized getFileName function (from exportUtils.ts)
 export const getFileName = (resumeData: ResumeData, fileExtension: 'pdf' | 'doc'): string => {
     const namePart = resumeData.name.replace(/\s+/g, '_');
-    const rolePart = resumeData.targetRole ? `_${resumeData.targetRole.replace(/\s+/g, '_')}` : ''; // Re-added rolePart logic
-    return `${namePart}${rolePart}_Resume.${fileExtension}`; // Reverted to include rolePart
+    const rolePart = resumeData.targetRole ? `_${resumeData.targetRole.replace(/\s+/g, '_')}` : '';
+    return `${namePart}${rolePart}_Resume.${fileExtension}`;
 };
 
 // Generate Word document with mobile optimization
 export const exportToWord = async (resumeData: ResumeData, userType: UserType = 'experienced'): Promise<void> => {
-  // Use the centralized getFileName
   const fileName = getFileName(resumeData, 'doc');
 
   try {
@@ -793,24 +769,23 @@ export const exportToWord = async (resumeData: ResumeData, userType: UserType = 
 const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experienced'): string => {
   const contactParts = [];
 
-  if (data.phone) {
+  if (isValidField(data.phone)) {
     contactParts.push(`<b>Phone no:</b> <a href="tel:${data.phone}" style="color: #2563eb !important; text-decoration: underline !important;">${data.phone}</a>`);
   }
 
-  if (data.email) {
+  if (isValidField(data.email)) {
     contactParts.push(`<b>Email:</b> <a href="mailto:${data.email}" style="color: #2563eb !important; text-decoration: underline !important;">${data.email}</a>`);
   }
 
-  if (data.linkedin) {
+  if (isValidField(data.linkedin)) {
     contactParts.push(`<b>LinkedIn:</b> <a href="${data.linkedin}" target="_blank" rel="noopener noreferrer" style="color: #2563eb !important; text-decoration: underline !important;">${data.linkedin}</a>`);
   }
 
-  if (data.github) {
+  if (isValidField(data.github)) {
     contactParts.push(`<b>GitHub:</b> <a href="${data.github}" target="_blank" rel="noopener noreferrer" style="color: #2563eb !important; text-decoration: underline !important;">${data.github}</a>`);
   }
 
-  // Add location to contact info for Word export
-  if (data.location) {
+  if (isValidField(data.location)) {
     contactParts.push(`<b>Location:</b> ${data.location}`);
   }
 
@@ -825,7 +800,6 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
 ` : '';
 
 
-  // Updated Education HTML to use table for layout
   const educationHtml = data.education && data.education.length > 0 ? `
     <div style="margin-top: 5pt;">
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">EDUCATION</div>
@@ -835,8 +809,8 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
               <div class="degree" style="font-size: 9.5pt; font-weight: bold; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.degree}</div>
-              <div class="school" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.school}</div>
-              ${edu.cgpa ? `<div style="font-size: 9.5pt; color: #4B5563; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">CGPA: ${edu.cgpa}</div>` : ''}
+              <div class="school" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.school}${isValidField(edu.location) ? `, ${edu.location}` : ''}</div>
+              ${isValidField(edu.cgpa) ? `<div style="font-size: 9.5pt; color: #4B5563; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">CGPA: ${edu.cgpa}</div>` : ''}
               ${edu.relevantCoursework && edu.relevantCoursework.length > 0 ? `<div style="font-size: 9.5pt; color: #4B5563; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Relevant Coursework: ${edu.relevantCoursework.join(', ')}</div>` : ''}
             </td>
             <td style="padding: 0; vertical-align: top; text-align: right; white-space: nowrap;">
@@ -848,7 +822,6 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
     </div>
   ` : '';
 
-  // Updated Work Experience HTML to use table for layout
   const workExperienceHtml = data.workExperience && data.workExperience.length > 0 ? `
     <div style="margin-top: 5pt;">
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${userType === 'fresher' ? 'WORK EXPERIENCE' : 'EXPERIENCE'}</div>
@@ -857,7 +830,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 1pt;">
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
-              <div class="job-title" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><b style="font-weight: bold;">${job.role}</b> | ${job.company}${job.location ? `, ${job.location}` : ''}</div>
+              <div class="job-title" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><b style="font-weight: bold;">${job.role}</b> | ${job.company}${isValidField(job.location) ? `, ${job.location}` : ''}</div>
             </td>
             <td style="padding: 0; vertical-align: top; text-align: right; white-space: nowrap;">
               <div class="year" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold;">${job.year}</div>
@@ -1109,7 +1082,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <div class="header">
         <div class="name">${data.name.toUpperCase()}</div>
         ${contactInfo ? `<div class="contact">${contactInfo}</div>` : ''}
-        <hr class="header-line">
+        
       </div>
 
       ${sectionOrderHtml}
