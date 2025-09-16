@@ -121,7 +121,9 @@ SKILLS REQUIREMENTS:
 5. Include both technical and soft skills relevant to the role
 6.TO GENERATE SOFT SKILLS according jd
 CERTIFICATIONS REQUIREMENTS:
-1. For each certification, provide a concise 15 words description in the 'description' field.
+1. Return certifications as an array of objects, where each object has a "title" and a "description" field.
+2. The "title" should be the name of the certification.
+3. The "description" should be a concise 15-word summary.
 
 SOCIAL LINKS REQUIREMENTS - CRITICAL:
 1. LinkedIn URL: "${linkedinUrl || ''}" - ONLY include if this is NOT empty
@@ -176,13 +178,13 @@ Rules:
 
 JSON Structure:
 {
-  "name": "${userName || '...'}",
+  "name": "${userName || '...'}`,
   "location": "...",
-  "phone": "${userPhone || '...'}",
-  "email": "${userEmail || '...'}",
-  "linkedin": "${userLinkedin || linkedinUrl || '...'}",
-  "github": "${userGithub || githubUrl || '...'}",
-  "targetRole": "${targetRole || '...'}",
+  "phone": "${userPhone || '...'}`,
+  "email": "${userEmail || '...'}`,
+  "linkedin": "${userLinkedin || linkedinUrl || '...'}`,
+  "github": "${userGithub || githubUrl || '...'}`,
+  "targetRole": "${targetRole || '...'}`,
   ${userType === 'experienced' ? '"summary": "...",' : ''}
   ${userType === 'student' ? '"careerObjective": "...",' : ''}
   ${userType === 'fresher' ? '"summary": "...",' : ''}
@@ -201,8 +203,9 @@ JSON Structure:
   "certifications": [{"title": "...", "description": "..."}, "..."],
   ${userType === 'fresher' || userType === 'student' ? `
   "achievements": ["...", "..."],
-  
-  "personalDetails": "..."` : '}
+  "extraCurricularActivities": ["...", "..."],
+  "languagesKnown": ["...", "..."],
+  "personalDetails": "..."` : ''}
 }
 Resume:
 ${resume}
@@ -214,10 +217,10 @@ User Type: ${userType.toUpperCase()}
 
 LinkedIn URL provided: ${linkedinUrl || 'NONE - leave empty'}
 GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
- 
-   const maxRetries = 5; // Increased from 3 to 5
-   let retryCount = 3;
-   let delay = 2000; // Increased from 1000 (1 second) to 2000 (2 seconds)
+ 
+    const maxRetries = 5; // Increased from 3 to 5
+    let retryCount = 3;
+    let delay = 2000; // Increased from 1000 (1 second) to 2000 (2 seconds)
 
   while (retryCount < maxRetries) {
     try {
@@ -230,7 +233,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
           "X-Title": "PrimoBoost AI"
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-pro-1.5",
           messages: [
             {
               role: "user",
@@ -287,27 +290,17 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
           }));
         }
 
-        // Ensure certifications are strings, not objects
+        // MODIFIED: Handle both string and object formats for certifications
         if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
           parsedResult.certifications = parsedResult.certifications.map((cert: any) => {
-            if (typeof cert === 'object' && cert !== null) {
-              // Handle various object formats
-              if (cert.title && cert.description) {
-                return `${cert.title} - ${cert.description}`;
-              } else if (cert.title && cert.issuer) {
-                return `${cert.title} - ${cert.issuer}`;
-              } else if (cert.title) {
-                return cert.title;
-              } else if (cert.name) {
-                return cert.name;
-              } else if (cert.description) {
-                return cert.description;
-              } else {
-                // Convert any other object structure to string
-                return Object.values(cert).filter(Boolean).join(' - ');
-              }
+            if (typeof cert === 'object' && cert !== null && cert.title && cert.description) {
+              // If it's a valid object, keep it
+              return {
+                title: String(cert.title),
+                description: String(cert.description)
+              };
             }
-            // If it's already a string, return as is
+            // If it's a string or an invalid object, store it as a string
             return String(cert);
           });
         }
@@ -337,7 +330,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         } else if (parsedResult.email) {
           const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
           const match = parsedResult.email.match(emailRegex);
-          parsedResult.email = match && match ? match : ""; // Extract valid email or set empty
+          parsedResult.email = match && match[1] ? match[1] : ""; // Extract valid email or set empty
         } else {
           parsedResult.email = ""; // Ensure it's an empty string if nothing is found
         }
@@ -350,7 +343,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
           // It's designed to be robust but might need adjustments for very unusual formats.
           const phoneRegex = /(\+?\d{1,3}[-.\s]?)(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
           const match = parsedResult.phone.match(phoneRegex);
-          parsedResult.phone = match && match ? match : ""; // Extract valid phone or set empty
+          parsedResult.phone = match && match[0] ? match[0] : ""; // Extract valid phone or set empty
         } else {
           parsedResult.phone = ""; // Ensure it's an empty string if nothing is found
         }
@@ -384,4 +377,3 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
   // If the loop finishes, it means all retries failed
   throw new Error(`Failed to optimize resume after ${maxRetries} attempts.`);
 };
-
