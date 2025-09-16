@@ -662,11 +662,16 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
             {optimizedResume && activeTab === 'resume' && (
               <>
                 <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden dark:bg-dark-100 dark:border-dark-300 dark:shadow-dark-xl">
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 border-b border-gray-200 dark:from-dark-200 dark:to-dark-300 dark:border-dark-400">
+                   <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 border-b border-gray-200 dark:from-dark-200 dark:to-dark-300 dark:border-dark-400 flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center">
                       <FileText className="w-5 h-5 mr-2 text-green-600 dark:text-neon-cyan-400" />
                       Export Resume
                     </h2>
+                      <ExportButtons
++                      resumeData={optimizedResume}
++                      userType={userType}
++                      // No need to pass onShowProfile or walletRefreshKey here unless ExportButtons directly uses them for its own UI
++                    />
                   </div>
                   <div className="p-6">
                     <ResumeExportSettings
