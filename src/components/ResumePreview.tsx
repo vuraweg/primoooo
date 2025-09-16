@@ -199,7 +199,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
               <h2 style={sectionTitleStyle}>
                 CAREER OBJECTIVE
               </h2>
-              {summaryTemplate !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
+              {/* MODIFIED: Removed the conditional underline div from here */}
               <p style={{ ...bodyTextStyle, marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
                 {resumeData.careerObjective}
               </p>
@@ -219,7 +219,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
               <h2 style={sectionTitleStyle}>
                 {summaryTemplate === 'functional' ? 'PROFESSIONAL PROFILE' : 'PROFESSIONAL SUMMARY'}
               </h2>
-              {summaryTemplate !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
+              {/* MODIFIED: Removed the conditional underline div from here */}
               <p style={{ ...bodyTextStyle, marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
                 {resumeData.summary}
               </p>
@@ -532,7 +532,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
           </div>
         );
 
-      case 'achievementsAndExtras': // MODIFIED: This section is now simplified
+      case 'achievementsAndExtras':
         const hasAchievements = resumeData.achievements && resumeData.achievements.length > 0;
 
         if (!hasAchievements) return null;
