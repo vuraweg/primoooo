@@ -267,7 +267,7 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
 
   workExperience.forEach((job, index) => {
     // Check if we need space for at least the job header and one bullet
-    const estimatedJobHeaderHeight = (PDF_CONFIG.fonts.jobTitle.size + PDF_CONFIG.fonts.company.size + PDF_CONFIG.fonts.year.size) * PDF_CONFIG.spacing.lineHeight * 0.352778;
+    const estimatedJobHeaderHeight = (PDF_CONFIG.fonts.jobTitle.size) * PDF_CONFIG.spacing.lineHeight * 0.352778;
     const estimatedMinBulletHeight = PDF_CONFIG.fonts.body.size * PDF_CONFIG.spacing.lineHeight * 0.352778;
     if (!checkPageSpace(state, estimatedJobHeaderHeight + estimatedMinBulletHeight + PDF_CONFIG.spacing.bulletListSpacing * 2 + PDF_CONFIG.spacing.afterSubsection, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
@@ -276,37 +276,26 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
     // Capture Y before drawing job details for year alignment
     const initialYForJob = state.currentY;
 
-    // Job title
-    drawText(state, job.role, PDF_CONFIG.margins.left, PDF_CONFIG, {
-      fontSize: PDF_CONFIG.fonts.jobTitle.size,
-      fontWeight: PDF_CONFIG.fonts.jobTitle.weight
-    });
+    // MODIFIED: Combine Role, Company, and Location into a single string
+    const combinedTitle = `${job.role} | ${job.company}${job.location ? `, ${job.location}` : ''}`;
 
-    // Company name and Year
-    const companyYearText = `${job.company} ${job.location ? `, ${job.location}` : ''}`; // Include location here
-    state.doc.setFont(PDF_CONFIG.fontFamily, PDF_CONFIG.fonts.company.weight);
-    state.doc.setFontSize(PDF_CONFIG.fonts.company.size);
-    state.doc.setTextColor(PDF_CONFIG.colors.primary[0], PDF_CONFIG.colors.primary[1], PDF_CONFIG.colors.primary[2]);
-
-    const companyTextLines = state.doc.splitTextToSize(companyYearText, PDF_CONFIG.contentWidth / 1.5); // Give space for year
-    const companyHeight = companyTextLines.length * (PDF_CONFIG.fonts.company.size * PDF_CONFIG.spacing.lineHeight * 0.352778);
-
+    // Draw Year (right-aligned) first to calculate its width
     const yearText = job.year;
-    state.doc.setFont(PDF_CONFIG.fontFamily, PDF_CONFIG.fonts.year.weight);
+    state.doc.setFont(PDF_CONFIG.fontFamily, 'bold'); // Year is bold
     state.doc.setFontSize(PDF_CONFIG.fonts.year.size);
     const yearWidth = state.doc.getTextWidth(yearText);
     const yearX = PDF_CONFIG.margins.left + PDF_CONFIG.contentWidth - yearWidth;
-
-    // Calculate Y for year, aiming to align it with the top line of job title/company
-    const yearY = initialYForJob + (PDF_CONFIG.fonts.jobTitle.size * 0.352778 * 0.5); // Better vertical centering with job title
-
-    // MODIFIED: Make year bold for PDF
-    state.doc.setFont(PDF_CONFIG.fontFamily, 'bold');
+    const yearY = initialYForJob + (PDF_CONFIG.fonts.jobTitle.size * 0.352778 * 0.5);
+    
     state.doc.text(yearText, yearX, yearY);
     state.doc.setFont(PDF_CONFIG.fontFamily, 'normal'); // Reset font weight
-    
-    state.doc.text(companyYearText, PDF_CONFIG.margins.left, state.currentY); // Draw company name on its own line
-    state.currentY += companyHeight;
+
+    // Draw the combined title string
+    drawText(state, combinedTitle, PDF_CONFIG.margins.left, PDF_CONFIG, {
+      fontSize: PDF_CONFIG.fonts.jobTitle.size,
+      fontWeight: 'normal', // Use normal weight as role is not bold in combined string
+      maxWidth: PDF_CONFIG.contentWidth - yearWidth - 5 // leave 5mm gap
+    });
 
     state.currentY += 1; // Small gap before bullets
 
@@ -870,8 +859,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 6pt;">
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
-              <div class="job-title" style="font-size: 9.5pt; font-weight: bold; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${job.role}</div>
-              <div class="company" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${job.company}${job.location ? `, ${job.location}` : ''}</div>
+              <div class="job-title" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><b style="font-weight: bold;">${job.role}</b> | ${job.company}${job.location ? `, ${job.location}` : ''}</div>
             </td>
             <td style="padding: 0; vertical-align: top; text-align: right; white-space: nowrap;">
               <div class="year" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold;">${job.year}</div>
