@@ -149,13 +149,14 @@ ${userType === 'experienced' ? `
 - Languages Known: Include if present (list languages with proficiency levels if available)
 - Location: Include in contact information and education details
 ` : `
-- Professional Summary: OPTIONAL - only include if candidate has relevant internships/experience
+- Professional Summary: OPTIONAL - only if candidate has relevant internships/experience
 - Education: PROMINENT - include degree, institution, year, relevant coursework if applicable
 - Education: INCLUDE CGPA if mentioned in original resume (e.g., "CGPA: 8.4/10") and date format ex;2021-2024 
 - Academic Projects: IMPORTANT - treat as main experience section
 - Work Experience: COMBINE all internships, trainings, and work experience under this single section
 - Achievements: Include if present in original resume (academic awards, competitions, etc.)
 - Extra-curricular Activities: Include if present (leadership roles, clubs, volunteer work)
+- Certifications
 - Languages Known: Include if present (list languages with proficiency levels if available)
 - Personal Details: Include if present in original resume (brief personal information)
 `}
@@ -353,8 +354,8 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
 
         // Prioritize user profile data first
         parsedResult.name = userName || parsedResult.name || "";
-        parsedResult.linkedin = userLinkedin || linkedinUrl || "";
-        parsedResult.github = userGithub || githubUrl || "";
+        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || ""; // Prioritize userLinkedin
+        parsedResult.github = userGithub || parsedResult.github || "";     // Prioritize userGithub
 
         // Targeted cleaning and fallback for email
         if (userEmail) {
@@ -374,7 +375,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
           // This regex tries to capture common phone number patterns including international codes, parentheses, spaces, and hyphens.
           // It's designed to be robust but might need adjustments for very unusual formats.
           const phoneRegex = /(\+?\d{1,3}[-.\s]?)(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
-          const match = parsedResult.phone.match(phoneRegex);
+          const match = String(parsedResult.phone).match(phoneRegex); // Ensure parsedResult.phone is a string
           parsedResult.phone = match && match ? match : ""; // Extract valid phone or set empty
         } else {
           parsedResult.phone = ""; // Ensure it's an empty string if nothing is found
