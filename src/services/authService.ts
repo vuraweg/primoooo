@@ -348,7 +348,8 @@ private isValidGmail(email: string): boolean {
     console.log('AuthService: Marking profile prompt as seen for user ID:', userId);
     try {
       await this.updateUserProfile(userId, {
-        has_seen_profile_prompt: true}
+        has_seen_profile_prompt: true
+      }); // Correctly closed the object and function call
       console.log('AuthService: Profile prompt marked as seen successfully.');
     } catch (error) {
       console.error('AuthService: Error marking profile prompt as seen:', error);
