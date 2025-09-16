@@ -413,7 +413,15 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                   <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 2)}px` : '15.12px', listStyleType: 'none' }}>
                     {project.bullets.map((bullet, bulletIndex) => (
                       // MODIFIED: Use listItemStyle
-                      <li key={bulletIndex} style={listItemStyle}>
+                      <li key={bulletIndex} style={{
+                        ...listItemStyle,
+                        '::before': {
+                          content: '"•"',
+                          position: 'absolute',
+                          left: '0',
+                          color: 'inherit'
+                        }
+                      }}>
                         {typeof bullet === 'string' ? bullet : (bullet as any).description || JSON.stringify(bullet)}
                       </li>
                     ))}
@@ -671,4 +679,3 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
     </div>
   );
 };
-
