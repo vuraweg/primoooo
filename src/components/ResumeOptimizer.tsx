@@ -184,6 +184,10 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
     if (!resumeData.education || resumeData.education.length === 0 || resumeData.education.every(edu => !edu.degree?.trim() || !edu.school?.trim() || !edu.year?.trim())) {
       missing.push('education');
     }
+    // Check for certifications
+    if (!resumeData.certifications || resumeData.certifications.length === 0 || resumeData.certifications.every(cert => (typeof cert === 'string' ? !cert.trim() : !cert.title?.trim()))) {
+      missing.push('certifications');
+    }
     return missing;
   }, []);
 
@@ -273,6 +277,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
         ...(data.projects && data.projects.length > 0 && { projects: data.projects }),
         ...(data.skills && data.skills.length > 0 && { skills: data.skills }),
         ...(data.education && data.education.length > 0 && { education: data.education }),
+        ...(data.certifications && data.certifications.length > 0 && { certifications: data.certifications }), // Add certifications
         ...(data.summary && { summary: data.summary })
       };
       setShowMissingSectionsModal(false);
