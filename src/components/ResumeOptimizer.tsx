@@ -20,6 +20,7 @@ import { ResumeData, UserType, MatchScore, DetailedScore, ExtractionResult, Scor
 import { ExportOptions, defaultExportOptions } from '../types/export';
 import { exportToPDF, exportToWord } from '../utils/exportUtils';
 import { useNavigate } from 'react-router-dom';
+import { ExportButtons } from './ExportButtons';
 
 interface ResumeOptimizerProps {
   isAuthenticated: boolean;
@@ -882,3 +883,4 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
 };
 
 export default ResumeOptimizer;
+
