@@ -237,7 +237,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
           <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
             <h2 style={sectionTitleStyle}>
               {template === 'functional' ? 'WORK HISTORY' : 
-               userType === 'fresher' || userType === 'student' ? 'INTERNSHIPS & TRAINING' : 'PROFESSIONAL EXPERIENCE'}
+                userType === 'fresher' || userType === 'student' ? 'INTERNSHIPS & TRAINING' : 'PROFESSIONAL EXPERIENCE'}
             </h2>
             <div style={sectionUnderlineStyle}></div>
 
@@ -373,7 +373,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
           <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
             <h2 style={sectionTitleStyle}>
               {isProjectsFocused ? 'RELEVANT PROJECTS' : 
-               userType === 'fresher' || userType === 'student' ? 'ACADEMIC PROJECTS' : 'PROJECTS'}
+                userType === 'fresher' || userType === 'student' ? 'ACADEMIC PROJECTS' : 'PROJECTS'}
             </h2>
             <div style={sectionUnderlineStyle}></div>
 
@@ -487,7 +487,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
             </h2>
             {!isSidebarTemplate && exportOptions?.template !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
 
-            // MODIFIED: listStyleType to 'none'
+            {/* MODIFIED: listStyleType to 'none' */}
             <ul style={{ 
               marginLeft: isSidebarTemplate ? '0' : exportOptions ? `${mmToPx(exportOptions.entrySpacing * 2)}px` : '15.12px', 
               listStyleType: 'none' // Changed from isSidebarTemplate ? 'none' : 'disc' to always 'none'
@@ -532,61 +532,26 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
           </div>
         );
 
-      case 'achievementsAndExtras': // Combined section for freshers and students
+      case 'achievementsAndExtras': // MODIFIED: This section is now simplified
         const hasAchievements = resumeData.achievements && resumeData.achievements.length > 0;
-        const hasExtraCurricular = resumeData.extraCurricularActivities && resumeData.extraCurricularActivities.length > 0;
-        const hasLanguages = resumeData.languagesKnown && resumeData.languagesKnown.length > 0;
-        const hasPersonalDetails = resumeData.personalDetails && resumeData.personalDetails.trim() !== '';
 
-        if (!hasAchievements && !hasExtraCurricular && !hasLanguages && !hasPersonalDetails) return null;
+        if (!hasAchievements) return null;
 
         return (
           <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
             <h2 style={sectionTitleStyle}>
-              {userType === 'student' ? 'ACHIEVEMENTS & EXTRACURRICULAR' : 'ACHIEVEMENTS & EXTRAS'}
+              ACHIEVEMENTS
             </h2>
             <div style={sectionUnderlineStyle}></div>
 
             {hasAchievements && (
               <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
                 <p style={{ ...bodyTextStyle, fontWeight: 'bold', marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 0.5)}px` : '3.78px' }}>Achievements:</p>
-                // MODIFIED: listStyleType to 'none'
                 <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 3)}px` : '22.68px', listStyleType: 'none' }}>
                   {resumeData.achievements!.map((item, index) => (
-                    // MODIFIED: Use listItemStyle
                     <li key={index} style={listItemStyle}>{item}</li>
                   ))}
                 </ul>
-              </div>
-            )}
-            {hasExtraCurricular && (
-              <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
-                <p style={{ ...bodyTextStyle, fontWeight: 'bold', marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 0.5)}px` : '3.78px' }}>Extra-curricular Activities:</p>
-                // MODIFIED: listStyleType to 'none'
-                <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 3)}px` : '22.68px', listStyleType: 'none' }}>
-                  {resumeData.extraCurricularActivities!.map((item, index) => (
-                    // MODIFIED: Use listItemStyle
-                    <li key={index} style={listItemStyle}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {hasLanguages && (
-              <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
-                <p style={{ ...bodyTextStyle, fontWeight: 'bold', marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 0.5)}px` : '3.78px' }}>Languages Known:</p>
-                // MODIFIED: listStyleType to 'none'
-                <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 3)}px` : '22.68px', listStyleType: 'none' }}>
-                  {resumeData.languagesKnown!.map((item, index) => (
-                    // MODIFIED: Use listItemStyle
-                    <li key={index} style={listItemStyle}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {hasPersonalDetails && (
-              <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
-                <p style={{ ...bodyTextStyle, fontWeight: 'bold', marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 0.5)}px` : '3.78px' }}>Personal Details:</p>
-                <p style={{ ...bodyTextStyle, marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 3)}px` : '22.68px' }}>{resumeData.personalDetails}</p>
               </div>
             )}
           </div>
@@ -714,4 +679,3 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
     </div>
   );
 };
-
