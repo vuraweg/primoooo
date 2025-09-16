@@ -300,7 +300,11 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
     // Calculate Y for year, aiming to align it with the top line of job title/company
     const yearY = initialYForJob + (PDF_CONFIG.fonts.jobTitle.size * 0.352778 * 0.5); // Better vertical centering with job title
 
+    // MODIFIED: Make year bold for PDF
+    state.doc.setFont(PDF_CONFIG.fontFamily, 'bold');
     state.doc.text(yearText, yearX, yearY);
+    state.doc.setFont(PDF_CONFIG.fontFamily, 'normal'); // Reset font weight
+    
     state.doc.text(companyYearText, PDF_CONFIG.margins.left, state.currentY); // Draw company name on its own line
     state.currentY += companyHeight;
 
@@ -389,7 +393,10 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
     const yearX = PDF_CONFIG.margins.left + PDF_CONFIG.contentWidth - yearWidth;
     const yearY = initialYForEdu + (PDF_CONFIG.fonts.jobTitle.size * 0.352778 * 0.5); // Better vertical centering with degree title
 
+    // MODIFIED: Make year bold for PDF
+    state.doc.setFont(PDF_CONFIG.fontFamily, 'bold');
     state.doc.text(edu.year, yearX, yearY);
+    state.doc.setFont(PDF_CONFIG.fontFamily, 'normal'); // Reset font weight
 
     totalHeight += degreeHeight + schoolHeight + cgpaHeight;
 
@@ -846,7 +853,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
               ${edu.relevantCoursework && edu.relevantCoursework.length > 0 ? `<div style="font-size: 9.5pt; color: #4B5563; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Relevant Coursework: ${edu.relevantCoursework.join(', ')}</div>` : ''}
             </td>
             <td style="padding: 0; vertical-align: top; text-align: right; white-space: nowrap;">
-              <div class="year" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.year}</div>
+              <div class="year" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold;">${edu.year}</div>
             </td>
           </tr>
         </table>
@@ -867,7 +874,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
               <div class="company" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${job.company}${job.location ? `, ${job.location}` : ''}</div>
             </td>
             <td style="padding: 0; vertical-align: top; text-align: right; white-space: nowrap;">
-              <div class="year" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${job.year}</div>
+              <div class="year" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold;">${job.year}</div>
             </td>
           </tr>
         </table>
