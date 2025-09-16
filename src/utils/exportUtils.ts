@@ -676,16 +676,16 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
     // Draw contact information
     drawContactInfo(state, resumeData, PDF_CONFIG);
 
-    // Add separator line
-    const separatorY = state.currentY;
-    doc.setDrawColor(0, 0, 0); // Dark gray
-    doc.setLineWidth(0.4);
-    doc.line(
-      PDF_CONFIG.margins.left, // Start from left margin
-      separatorY,
-      PDF_CONFIG.pageWidth - PDF_CONFIG.margins.right, // End at right margin
-      separatorY
-    );
+    // MODIFIED: Remove separator line
+    // const separatorY = state.currentY;
+    // doc.setDrawColor(0, 0, 0); // Dark gray
+    // doc.setLineWidth(0.4);
+    // doc.line(
+    //   PDF_CONFIG.margins.left, // Start from left margin
+    //   separatorY,
+    //   PDF_CONFIG.pageWidth - PDF_CONFIG.margins.right, // End at right margin
+    //   separatorY
+    // );
     state.currentY += 3; // Space after separator line
 
     // Conditional rendering of Professional Summary based on userType and content
@@ -1125,7 +1125,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <div class="header">
         <div class="name">${data.name.toUpperCase()}</div>
         ${contactInfo ? `<div class="contact">${contactInfo}</div>` : ''}
-        <hr class="header-line">
+        
       </div>
 
       ${sectionOrderHtml}
