@@ -201,9 +201,7 @@ JSON Structure:
   "certifications": [{"title": "...", "description": "..."}, "..."],
   ${userType === 'fresher' || userType === 'student' ? `
   "achievements": ["...", "..."],
-  "extraCurricularActivities": ["...", "..."],
-  "languagesKnown": ["...", "..."],
-  "personalDetails": "..."` : ''}
+ 
 }
 Resume:
 ${resume}
