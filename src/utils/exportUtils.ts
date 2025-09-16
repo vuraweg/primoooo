@@ -331,7 +331,7 @@ function drawWorkExperience(
     safeSetFont(state.doc, PDF_CONFIG.fontFamily, 'normal');
     drawText(state, combinedTitle, PDF_CONFIG.margins.left, PDF_CONFIG, {
       fontSize: PDF_CONFIG.fonts.jobTitle.size,
-      fontWeight: 'normal',
+       fontWeight: PDF_CONFIG.fonts.jobTitle.weight,
       maxWidth: PDF_CONFIG.contentWidth - yearWidth - 5,
     });
 
