@@ -349,7 +349,7 @@ private isValidGmail(email: string): boolean {
     try {
       await this.updateUserProfile(userId, {
         has_seen_profile_prompt: true
-      console.log('AuthService: Profile prompt marked as seen successfully.');
+      
     } catch (error) {
       console.error('AuthService: Error marking profile prompt as seen:', error);
       throw new Error('Failed to update profile prompt status');
