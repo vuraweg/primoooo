@@ -505,8 +505,8 @@ function drawSkills(state: PageState, skills: any[], PDF_CONFIG: any): number {
 
     // Add small space between skill categories
     if (index < skills.length - 1) {
-      state.currentY += 2;
-      totalHeight += 2;
+      state.currentY += 1;
+      totalHeight += 1;
     }
   });
 
@@ -899,7 +899,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">SKILLS</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.skills.map(skill => `
-        <div class="skills-item" style="font-size: 9.5pt; margin: 1.5pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div class="skills-item" style="font-size: 9.5pt; margin: 0.5pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
           <span class="skill-category" style="font-weight: bold; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${skill.category}:</span> ${skill.list ? skill.list.join(', ') : ''}
         </div>
       `).join('')}
