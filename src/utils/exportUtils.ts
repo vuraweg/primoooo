@@ -1,3 +1,4 @@
+// src/utils/exportUtils.ts
 import jsPDF from 'jspdf';
 import { ResumeData, Certification } from '../types/resume';
 import { saveAs } from 'file-saver';
@@ -719,11 +720,10 @@ export const exportToPDF = async (
     state.currentY += 3;
 
     // Summary / Objective
-    if (isValidField(resumeData.summary)) {
-      drawProfessionalSummary(state, resumeData.summary!, PDF_CONFIG);
-    }
-    if (userType === 'student' && isValidField(resumeData.careerObjective)) {
+    if ((userType === 'fresher' || userType === 'student') && isValidField(resumeData.careerObjective)) {
       drawCareerObjective(state, resumeData.careerObjective!, PDF_CONFIG);
+    } else if (isValidField(resumeData.summary)) {
+      drawProfessionalSummary(state, resumeData.summary!, PDF_CONFIG);
     }
 
     // Sections by userType
@@ -857,14 +857,15 @@ const generateWordHTMLContent = (
 
   const contactInfo = contactParts.join(' | ');
 
-  const summaryHtml = data.summary
-    ? `
+  const summaryHtml =
+    data.summary && data.summary.trim() !== ''
+      ? `
   <div style="margin-top: 5pt;">
     <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">PROFESSIONAL SUMMARY</div>
     <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
     <p style="margin-bottom: 12pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt;">${data.summary}</p>
   </div>`
-    : '';
+      : '';
 
   const educationHtml =
     data.education && data.education.length > 0
@@ -1051,10 +1052,17 @@ const generateWordHTMLContent = (
   </div>`
       : '';
 
+  let objectiveOrSummaryHtml = '';
+  if ((userType === 'fresher' || userType === 'student') && data.careerObjective && data.careerObjective.trim() !== '') {
+    objectiveOrSummaryHtml = careerObjectiveHtml;
+  } else if (data.summary && data.summary.trim() !== '') {
+    objectiveOrSummaryHtml = summaryHtml;
+  }
+
   let sectionOrderHtml = '';
   if (userType === 'student') {
     sectionOrderHtml = `
-      ${careerObjectiveHtml}
+      ${objectiveOrSummaryHtml}
       ${educationHtml}
       ${skillsHtml}
       ${projectsHtml}
@@ -1064,7 +1072,7 @@ const generateWordHTMLContent = (
     `;
   } else if (userType === 'experienced') {
     sectionOrderHtml = `
-      ${summaryHtml}
+      ${objectiveOrSummaryHtml}
       ${workExperienceHtml}
       ${projectsHtml}
       ${skillsHtml}
@@ -1074,7 +1082,7 @@ const generateWordHTMLContent = (
   } else {
     // Fresher
     sectionOrderHtml = `
-      ${summaryHtml}
+      ${objectiveOrSummaryHtml}
       ${educationHtml}
       ${workExperienceHtml}
       ${projectsHtml}
@@ -1136,8 +1144,8 @@ const generateWordHTMLContent = (
         .job-title, .degree { font-size: 9.5pt !important; font-weight: bold !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .company, .school, .year { font-size: 9.5pt !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .bullets { margin-left: 4mm !important; margin-bottom: 4pt !important; margin-top: 2pt !important; }
-        .bullet { font-size: 9.5pt !important; line-height: 1.25 !important; margin: 0 0 1pt 0 !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
-        .skills-item { font-size: 9.5pt !important; margin: 1.5pt 0 !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
+        .bullet { font-size: 9.5pt !important; line-height: 1.4 !important; margin: 0 0 1pt 0 !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
+        .skills-item { font-size: 9.5pt !important; margin: 0.5pt 0 !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .skill-category { font-weight: bold !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         .project-title { font-size: 9.5pt !important; font-weight: bold !important; margin-bottom: 2pt !important; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
         @media print { body { margin: 0 !important; } }
@@ -1148,12 +1156,7 @@ const generateWordHTMLContent = (
         <div class="name">${(data.name || '').toUpperCase()}</div>
         ${contactInfo ? `<div class="contact">${contactInfo}</div>` : ''}
       </div>
-      ${userType === 'student'
-        ? `${careerObjectiveHtml}${educationHtml}${skillsHtml}${projectsHtml}${workExperienceHtml}${certificationsHtml}${achievementsHtml}`
-        : userType === 'experienced'
-        ? `${summaryHtml}${workExperienceHtml}${projectsHtml}${skillsHtml}${certificationsHtml}${educationHtml}`
-        : `${summaryHtml}${educationHtml}${workExperienceHtml}${projectsHtml}${skillsHtml}${certificationsHtml}${achievementsHtml}`
-      }
+      ${sectionOrderHtml}
     </body>
     </html>
   `;
