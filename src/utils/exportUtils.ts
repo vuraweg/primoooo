@@ -394,7 +394,7 @@ function drawEducation(state: PageState, education: any[] = [], PDF_CONFIG: any)
       PDF_CONFIG,
       {
         fontSize: PDF_CONFIG.fonts.company.size,
-         fontWeight: 'normal',,
+         fontWeight: 'normal',
         color: PDF_CONFIG.colors.primary,
       }
     );
