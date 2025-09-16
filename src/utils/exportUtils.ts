@@ -109,14 +109,19 @@ const isValidField = (
       switch (fieldType) {
         case 'phone': {
           const digitCount = (field.match(/\d/g) || []).length;
-          result = digitCount >= 7;
+          result = digitCount >= 7 && digitCount <= 15; // More reasonable phone number length
           break;
         }
         case 'email':
           result = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field);
           break;
         case 'url':
-          result = /^https?:\/\//.test(field);
+          // Accept URLs with or without protocol, and common social media patterns
+          result = /^https?:\/\//.test(field) || 
+                   /^(www\.)?linkedin\.com\/in\//.test(field) ||
+                   /^(www\.)?github\.com\//.test(field) ||
+                   /linkedin\.com\/in\//.test(field) ||
+                   /github\.com\//.test(field);
           break;
         case 'text':
         default:
@@ -278,6 +283,13 @@ function drawSectionTitle(state: PageState, title: string, PDF_CONFIG: any): num
 // Contact info (centered)
 function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: any): number {
   console.log('[drawContactInfo] Received resumeData:', resumeData);
+  console.log('[drawContactInfo] Individual contact fields:');
+  console.log('  - location:', resumeData.location);
+  console.log('  - phone:', resumeData.phone);
+  console.log('  - email:', resumeData.email);
+  console.log('  - linkedin:', resumeData.linkedin);
+  console.log('  - github:', resumeData.github);
+  
   const contactParts: string[] = [];
 
   const add = (
@@ -295,17 +307,21 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
     
     if (isValidField(processedValue, fieldType)) {
       contactParts.push(processedValue);
+       console.log(`[drawContactInfo] Successfully added: "${processedValue}"`);
+     } else {
+       console.log(`[drawContactInfo] Field rejected by validation: "${processedValue}"`);
     }
   };
 
-  add(resumeData.location, 'text');
   add(resumeData.phone, 'phone');
   add(resumeData.email, 'email');
+  add(resumeData.location, 'text');
   add(resumeData.linkedin, 'url');
   add(resumeData.github, 'url');
 
   if (contactParts.length === 0) return 0;
   const contactText = contactParts.join(' | ');
+  console.log('[drawContactInfo] Final contact text:', contactText);
 
   const height = drawText(state, contactText, PDF_CONFIG.margins.left, PDF_CONFIG, {
     fontSize: PDF_CONFIG.fonts.contact.size,

@@ -354,8 +354,10 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
 
         // Prioritize user profile data first
         parsedResult.name = userName || parsedResult.name || "";
-        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || ""; // Prioritize userLinkedin
-        parsedResult.github = userGithub || parsedResult.github || "";     // Prioritize userGithub
+        
+        // FIXED: Prioritize user profile data for social links
+        parsedResult.linkedin = userLinkedin || linkedinUrl || parsedResult.linkedin || "";
+        parsedResult.github = userGithub || githubUrl || parsedResult.github || "";
 
         // Targeted cleaning and fallback for email
         if (userEmail) {
@@ -363,7 +365,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         } else if (parsedResult.email) {
           const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
           const match = parsedResult.email.match(emailRegex);
-          parsedResult.email = match && match ? match : ""; // Extract valid email or set empty
+          parsedResult.email = match && match[0] ? match[0] : ""; // Extract valid email or set empty
         } else {
           parsedResult.email = ""; // Ensure it's an empty string if nothing is found
         }
@@ -376,7 +378,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
           // It's designed to be robust but might need adjustments for very unusual formats.
           const phoneRegex = /(\+?\d{1,3}[-.\s]?)(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
           const match = String(parsedResult.phone).match(phoneRegex); // Ensure parsedResult.phone is a string
-          parsedResult.phone = match && match ? match : ""; // Extract valid phone or set empty
+          parsedResult.phone = match && match[0] ? match[0] : ""; // FIXED: Extract the full matched phone number string
         } else {
           parsedResult.phone = ""; // Ensure it's an empty string if nothing is found
         }

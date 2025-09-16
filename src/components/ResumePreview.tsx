@@ -88,48 +88,99 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   // Build contact information with proper separators
   const buildContactInfo = () => {
+    console.log('[ResumePreview] buildContactInfo - resumeData:', resumeData);
+    console.log('[ResumePreview] Individual contact fields:');
+    console.log('  - phone:', resumeData.phone);
+    console.log('  - email:', resumeData.email);
+    console.log('  - location:', resumeData.location);
+    console.log('  - linkedin:', resumeData.linkedin);
+    console.log('  - github:', resumeData.github);
+    
     const parts: React.ReactNode[] = [];
 
-    if (resumeData.email) {
-      parts.push(
-        <span key="email" style={{ fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px' }}>
-          {resumeData.email}
-        </span>
-      );
-    }
+    // Helper function to validate fields (matching exportUtils.ts logic)
+    const isValidField = (field?: string | null, fieldType: 'phone' | 'email' | 'url' | 'text' = 'text'): boolean => {
+      if (!field || field.trim() === '') return false;
+      
+      const lower = field.trim().toLowerCase();
+      const invalidValues = ['n/a', 'not specified', 'none'];
+      if (invalidValues.includes(lower)) return false;
+      
+      switch (fieldType) {
+        case 'phone': {
+          const digitCount = (field.match(/\d/g) || []).length;
+          return digitCount >= 7 && digitCount <= 15;
+        }
+        case 'email':
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field);
+        case 'url':
+          return /^https?:\/\//.test(field) || 
+                 /^(www\.)?linkedin\.com\/in\//.test(field) ||
+                 /^(www\.)?github\.com\//.test(field) ||
+                 /linkedin\.com\/in\//.test(field) ||
+                 /github\.com\//.test(field);
+        case 'text':
+        default:
+          return true;
+      }
+    };
 
-    if (resumeData.phone) {
+    // Add contact fields in the same order as PDF export
+    if (isValidField(resumeData.phone, 'phone')) {
       parts.push(
         <span key="phone" style={{ fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px' }}>
           {resumeData.phone}
         </span>
       );
+      console.log('[ResumePreview] Added phone:', resumeData.phone);
     }
 
-    if (resumeData.location) {
+    if (isValidField(resumeData.email, 'email')) {
+      parts.push(
+        <span key="email" style={{ fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px' }}>
+          {resumeData.email}
+        </span>
+      );
+      console.log('[ResumePreview] Added email:', resumeData.email);
+    }
+
+    if (isValidField(resumeData.location, 'text')) {
       parts.push(
         <span key="location" style={{ fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px' }}>
           {resumeData.location}
         </span>
       );
+      console.log('[ResumePreview] Added location:', resumeData.location);
     }
 
-    if (resumeData.linkedin) {
+    if (isValidField(resumeData.linkedin, 'url')) {
+      let processedLinkedin = resumeData.linkedin;
+      if (!processedLinkedin.startsWith('http')) {
+        processedLinkedin = `https://${processedLinkedin}`;
+      }
       parts.push(
         <span key="linkedin" style={{ fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px' }}>
-          {resumeData.linkedin}
+          {processedLinkedin}
         </span>
       );
+      console.log('[ResumePreview] Added linkedin:', processedLinkedin);
     }
 
-    if (resumeData.github) {
+    if (isValidField(resumeData.github, 'url')) {
+      let processedGithub = resumeData.github;
+      if (!processedGithub.startsWith('http')) {
+        processedGithub = `https://${processedGithub}`;
+      }
       parts.push(
         <span key="github" style={{ fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px' }}>
-          {resumeData.github}
+          {processedGithub}
         </span>
       );
+      console.log('[ResumePreview] Added github:', processedGithub);
     }
 
+    console.log('[ResumePreview] Total contact parts:', parts.length);
+    
     // Join with | separator
     return parts.map((part, index) => (
       <React.Fragment key={index}>
