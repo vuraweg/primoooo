@@ -1,7 +1,7 @@
 // src/components/ResumePreview.tsx
 import React from 'react';
 import { ResumeData, UserType } from '../types/resume';
-import { ExportOptions, templateConfigs } from '../types/export';
+import { ExportOptions, layoutConfigs, paperSizeConfigs } from '../types/export';
 
 interface ResumePreviewProps {
   resumeData: ResumeData;
@@ -140,36 +140,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   // Define section order based on user type
   const getSectionOrder = () => {
-    const template = exportOptions?.template || 'chronological';
-    const templateConfig = templateConfigs.find(t => t.id === template);
-    
-    if (templateConfig) {
-      if (template === 'two_column_safe') {
-        // For two-column layout, we'll handle this differently
-        return {
-          main: ['summary', 'workExperience', 'education'],
-          sidebar: ['skills', 'certifications', 'achievementsAndExtras']
-        };
-      } else {
-        // Map template sections to our internal section names
-        const sectionMapping: { [key: string]: string } = {
-          'Header': 'header',
-          'Summary': 'summary',
-          'Experience': 'workExperience',
-          'Education': 'education',
-          'Skills': 'skills',
-          'Key Skills': 'skills',
-          'Projects': 'projects',
-          'Projects/Extras': 'projects',
-          'Relevant Projects': 'projects',
-          'Certifications': 'certifications'
-        };
-        
-        return (templateConfig.sections as string[]).map(section => 
-          sectionMapping[section] || section.toLowerCase()
-        ).filter(section => section !== 'header'); // Header is handled separately
-      }
-    }
+    const layoutType = exportOptions?.layoutType || 'standard';
     
     // Fallback to user type based ordering
     if (userType === 'experienced') {
@@ -230,21 +201,20 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
       case 'workExperience':
         if (!resumeData.workExperience || resumeData.workExperience.length === 0) return null;
         
-        const template = exportOptions?.template || 'chronological';
-        const isExperienceFocused = template === 'chronological';
+        const layoutType = exportOptions?.layoutType || 'standard';
+        const isCompactLayout = layoutType === 'compact';
         
         return (
           <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
             <h2 style={sectionTitleStyle}>
-              {template === 'functional' ? 'WORK HISTORY' : 
-               userType === 'fresher' || userType === 'student' ? 'INTERNSHIPS & TRAINING' : 'PROFESSIONAL EXPERIENCE'}
+              {userType === 'fresher' || userType === 'student' ? 'INTERNSHIPS & TRAINING' : 'PROFESSIONAL EXPERIENCE'}
             </h2>
             <div style={sectionUnderlineStyle}></div>
 
             {resumeData.workExperience.map((job, index) => (
               <div key={index} style={{ 
                 marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 2)}px` : '15.12px',
-                ...(isExperienceFocused && { 
+                ...(isCompactLayout && { 
                   borderLeft: '2px solid #e5e7eb',
                   paddingLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px'
                 })
@@ -260,6 +230,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                     </div>
                     <div style={{
                       fontSize: exportOptions ? `${ptToPx(exportOptions.subHeaderSize)}px` : '12.67px',
+                      fontWeight: 'bold',
                       fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
                     }}>
                       {job.company}{job.location ? `, ${job.location}` : ''}
@@ -272,7 +243,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                     {job.year}
                   </div>
                 </div>
-                {job.bullets && job.bullets.length > 0 && template !== 'functional' && (
+                {job.bullets && job.bullets.length > 0 && (
                   // MODIFIED: listStyleType to 'none'
                   <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 2)}px` : '15.12px', listStyleType: 'none' }}>
                     {job.bullets.map((bullet, bulletIndex) => (
@@ -283,15 +254,6 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                     ))}
                   </ul>
                 )}
-                {template === 'functional' && job.bullets && job.bullets.length > 0 && (
-                  <div style={{ 
-                    fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize)}px` : '12.67px',
-                    fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                    marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px'
-                  }}>
-                    {job.bullets[0]}
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -300,7 +262,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
       case 'education':
         if (!resumeData.education || resumeData.education.length === 0) return null;
         
-        const isEducationPriority = exportOptions?.template === 'minimalist' || userType === 'student';
+        const isEducationPriority = userType === 'student';
         
         return (
           <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
@@ -367,13 +329,12 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
       case 'projects':
         if (!resumeData.projects || resumeData.projects.length === 0) return null;
         
-        const isProjectsFocused = exportOptions?.template === 'combination' || exportOptions?.template === 'functional';
+        const isProjectsFocused = layoutType === 'compact';
         
         return (
           <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
             <h2 style={sectionTitleStyle}>
-              {isProjectsFocused ? 'RELEVANT PROJECTS' : 
-               userType === 'fresher' || userType === 'student' ? 'ACADEMIC PROJECTS' : 'PROJECTS'}
+              {userType === 'fresher' || userType === 'student' ? 'ACADEMIC PROJECTS' : 'PROJECTS'}
             </h2>
             <div style={sectionUnderlineStyle}></div>
 
@@ -415,12 +376,12 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
         if (!resumeData.skills || resumeData.skills.length === 0) return null;
         
         // Enhanced skills rendering for functional and combination templates
-        const isSkillsFocused = exportOptions?.template === 'functional' || exportOptions?.template === 'combination';
+        const isSkillsFocused = layoutType === 'compact';
         
         return (
           <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
             <h2 style={sectionTitleStyle}>
-              {isSkillsFocused ? 'KEY SKILLS' : 'TECHNICAL SKILLS'}
+              TECHNICAL SKILLS
             </h2>
             <div style={sectionUnderlineStyle}></div>
 
@@ -471,7 +432,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
       case 'certifications':
         if (!resumeData.certifications || resumeData.certifications.length === 0) return null;
         
-        const isSidebarTemplate = exportOptions?.template === 'two_column_safe';
+        const isSidebarTemplate = false; // Simplified for now
         
         return (
           <div style={{ 
@@ -598,118 +559,60 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
   };
 
   return (
-    <div className={`card dark:bg-dark-100 dark:border-dark-300 ${
-      exportOptions?.template === 'two_column_safe' ? 'resume-two-column' : 'resume-one-column'
+    <div className={`card dark:bg-dark-100 dark:border-dark-300 resume-one-column ${
+      exportOptions?.layoutType === 'compact' ? 'resume-compact' : 'resume-standard'
+    } ${
+      exportOptions?.paperSize === 'letter' ? 'resume-letter' : 'resume-a4'
     }`}>
       <div
-        className={`pt-4 px-4 pb-6 sm:pt-6 sm:px-6 sm:pb-8 lg:px-8 max-h-[70vh] sm:max-h-[80vh] lg:max-h-[800px] overflow-y-auto dark:bg-dark-100 ${
-          exportOptions?.template === 'minimalist' ? 'resume-minimalist' : ''
-        }`}
+        className="pt-4 px-4 pb-6 sm:pt-6 sm:px-6 sm:pb-8 lg:px-8 max-h-[70vh] sm:max-h-[80vh] lg:max-h-[800px] overflow-y-auto dark:bg-dark-100"
         style={{
           fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
           fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize)}px` : '12.67px',
           lineHeight: '1.25', /* PDF_CONFIG.spacing.lineHeight */
           color: 'inherit',
-          padding: exportOptions?.template === 'minimalist' ? '20px' : '15px' /* Adjust padding based on template */
+          padding: exportOptions?.layoutType === 'compact' ? '12px' : '15px'
         }}
       >
-        {exportOptions?.template === 'two_column_safe' ? (
-          /* Two-Column Layout */
-          <div className="resume-two-column-container">
-            {/* Header spans full width */}
-            <div className="resume-header-full" style={{ textAlign: 'center', marginBottom: '18pt' }}>
-              <h1 style={{
-                fontSize: exportOptions ? `${ptToPx(exportOptions.nameSize)}px` : '24px',
-                fontWeight: 'bold',
-                letterSpacing: '1pt',
-                marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.4)}px` : '5.33px',
-                fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                textTransform: 'uppercase'
-              }}>
-                {resumeData.name}
-              </h1>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '18pt' }}>
+          <h1 style={{
+            fontSize: exportOptions ? `${ptToPx(exportOptions.nameSize)}px` : '24px',
+            fontWeight: 'bold',
+            letterSpacing: '1pt',
+            marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.4)}px` : '5.33px',
+            fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+            textTransform: 'uppercase'
+          }}>
+            {resumeData.name}
+          </h1>
 
-              {contactElements.length > 0 && (
-                <div style={{
-                  fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px',
-                  fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                  marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.6)}px` : '8px',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  flexWrap: 'wrap'
-                }}>
-                  {contactElements}
-                </div>
-              )}
-
-              <div style={{
-                borderBottomWidth: '0.5pt',
-                borderColor: '#404040',
-                height: '1px',
-                margin: '0 auto',
-                width: 'calc(100% - 20mm)'
-              }}></div>
+          {contactElements.length > 0 && (
+            <div style={{
+              fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px',
+              fontWeight: 'bold',
+              fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+              marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.6)}px` : '8px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexWrap: 'wrap'
+            }}>
+              {contactElements}
             </div>
+          )}
 
-            {/* Two-column content */}
-            <div className="resume-two-column-content">
-              {/* Main column */}
-              <div className="resume-main-column">
-                {(sectionOrder as any).main?.map((sectionName: string) => renderSection(sectionName))}
-              </div>
-              
-              {/* Sidebar column */}
-              <div className="resume-sidebar-column">
-                {(sectionOrder as any).sidebar?.map((sectionName: string) => renderSection(sectionName))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* One-Column Layout */
-          <>
-            {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '18pt' }}>
-              <h1 style={{
-                fontSize: exportOptions ? `${ptToPx(exportOptions.nameSize)}px` : '24px',
-                fontWeight: 'bold',
-                letterSpacing: exportOptions?.template === 'minimalist' ? '2pt' : '1pt',
-                marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.4)}px` : '5.33px',
-                fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                textTransform: exportOptions?.template === 'minimalist' ? 'none' : 'uppercase'
-              }}>
-                {resumeData.name}
-              </h1>
+          <div style={{
+            borderBottomWidth: '0.5pt',
+            borderColor: '#404040',
+            height: '1px',
+            margin: '0 auto',
+            width: 'calc(100% - 20mm)'
+          }}></div>
+        </div>
 
-              {contactElements.length > 0 && (
-                <div style={{
-                  fontSize: exportOptions ? `${ptToPx(exportOptions.bodyTextSize - 0.5)}px` : '12px',
-                  fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                  marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.6)}px` : '8px',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  flexWrap: 'wrap'
-                }}>
-                  {contactElements}
-                </div>
-              )}
-
-              {exportOptions?.template !== 'minimalist' && (
-                <div style={{
-                  borderBottomWidth: '0.5pt',
-                  borderColor: '#404040',
-                  height: '1px',
-                  margin: '0 auto',
-                  width: 'calc(100% - 20mm)'
-                }}></div>
-              )}
-            </div>
-
-            {/* Dynamic sections based on template */}
-            {(Array.isArray(sectionOrder) ? sectionOrder : []).map((sectionName) => renderSection(sectionName))}
-          </>
-        )}
+        {/* Dynamic sections */}
+        {(Array.isArray(sectionOrder) ? sectionOrder : []).map((sectionName) => renderSection(sectionName))}
       </div>
     </div>
   );

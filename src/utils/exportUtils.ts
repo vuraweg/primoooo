@@ -31,17 +31,21 @@ const safeGetTextWidth = (doc: jsPDF, text?: string | null): number => {
 const toSafeText = (v?: unknown): string => (typeof v === 'string' ? v : '');
 
 // ---------- Config ----------
-const createPDFConfig = (options: ExportOptions) => ({
-  // A4 in mm
-  pageWidth: 210,
-  pageHeight: 297, // fixed from 300 to true A4 height (297mm)
+const createPDFConfig = (options: ExportOptions) => {
+  const layoutConfig = options.layoutType === 'compact' ? 
+    { margins: { top: 8, bottom: 8, left: 12, right: 12 } } :
+    { margins: { top: 10, bottom: 10, left: 15, right: 15 } };
+  
+  const paperConfig = options.paperSize === 'letter' ?
+    { pageWidth: 216, pageHeight: 279 } :
+    { pageWidth: 210, pageHeight: 297 };
 
-  margins: {
-    top: options.template === 'compact' ? 8 : 10,
-    bottom: options.template === 'compact' ? 8 : 10,
-    left: options.template === 'compact' ? 12 : 15,
-    right: options.template === 'compact' ? 12 : 15,
-  },
+  return {
+  // A4 in mm
+  pageWidth: paperConfig.pageWidth,
+  pageHeight: paperConfig.pageHeight,
+
+  margins: layoutConfig.margins,
 
   get contentWidth() {
     return this.pageWidth - this.margins.left - this.margins.right;
@@ -77,7 +81,8 @@ const createPDFConfig = (options: ExportOptions) => ({
     accent: [37, 99, 235] as [number, number, number],
   },
   fontFamily: options.fontFamily,
-});
+  };
+};
 
 interface PageState {
   currentPage: number;
@@ -328,10 +333,10 @@ function drawWorkExperience(
     if (yearText) state.doc.text(yearText, yearX, yearY);
 
     // Title line
-    safeSetFont(state.doc, PDF_CONFIG.fontFamily, 'normal');
+    safeSetFont(state.doc, PDF_CONFIG.fontFamily, PDF_CONFIG.fonts.jobTitle.weight);
     drawText(state, combinedTitle, PDF_CONFIG.margins.left, PDF_CONFIG, {
       fontSize: PDF_CONFIG.fonts.jobTitle.size,
-       fontWeight: PDF_CONFIG.fonts.jobTitle.weight,
+      fontWeight: PDF_CONFIG.fonts.jobTitle.weight,
       maxWidth: PDF_CONFIG.contentWidth - yearWidth - 5,
     });
 
@@ -394,7 +399,7 @@ function drawEducation(state: PageState, education: any[] = [], PDF_CONFIG: any)
       PDF_CONFIG,
       {
         fontSize: PDF_CONFIG.fonts.company.size,
-         fontWeight: 'normal',
+        fontWeight: 'normal',
         color: PDF_CONFIG.colors.primary,
       }
     );

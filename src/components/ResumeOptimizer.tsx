@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { FileText, AlertCircle, Plus, Sparkles, ArrowLeft, X } from 'lucide-react';
 import { ResumePreview } from './ResumePreview';
-import { ExportButtons } from './ExportButtons';
+import { ResumeExportSettings } from './ResumeExportSettings';
 import { ProjectAnalysisModal } from './ProjectAnalysisModal';
 import { MobileOptimizedInterface } from './MobileOptimizedInterface';
 import { ProjectEnhancement } from './ProjectEnhancement';
@@ -17,6 +17,8 @@ import { optimizeResume } from '../services/geminiService';
 import { generateBeforeScore, generateAfterScore, getDetailedResumeScore, reconstructResumeText } from '../services/scoringService';
 import { paymentService } from '../services/paymentService';
 import { ResumeData, UserType, MatchScore, DetailedScore, ExtractionResult, ScoringMode } from '../types/resume';
+import { ExportOptions, defaultExportOptions } from '../types/export';
+import { exportToPDF, exportToWord } from '../utils/exportUtils';
 import { useNavigate } from 'react-router-dom';
 
 interface ResumeOptimizerProps {
@@ -102,6 +104,15 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
 
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
+
+  const [exportOptions, setExportOptions] = useState<ExportOptions>(defaultExportOptions);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [isExportingWord, setIsExportingWord] = useState(false);
+  const [exportStatus, setExportStatus] = useState<{
+    type: 'pdf' | 'word' | null;
+    status: 'success' | 'error' | null;
+    message: string;
+  }>({ type: null, status: null, message: '' });
 
   const [optimizationInterrupted, setOptimizationInterrupted] = useState(false);
 
@@ -490,6 +501,55 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
     setWalletRefreshKey(prevKey => prevKey + 1);
   }, [checkSubscriptionStatus, onShowPlanSelection]); // Dependencies for memoized function
 
+  const handleExportFile = useCallback(async (options: ExportOptions, format: 'pdf' | 'word') => {
+    if (!optimizedResume) return;
+    
+    if (format === 'pdf') {
+      if (isExportingPDF || isExportingWord) return;
+      setIsExportingPDF(true);
+    } else {
+      if (isExportingWord || isExportingPDF) return;
+      setIsExportingWord(true);
+    }
+    
+    setExportStatus({ type: null, status: null, message: '' });
+    
+    try {
+      if (format === 'pdf') {
+        await exportToPDF(optimizedResume, userType, options);
+      } else {
+        await exportToWord(optimizedResume, userType);
+      }
+      
+      setExportStatus({
+        type: format,
+        status: 'success',
+        message: `${format.toUpperCase()} exported successfully!`
+      });
+      
+      setTimeout(() => {
+        setExportStatus({ type: null, status: null, message: '' });
+      }, 3000);
+    } catch (error) {
+      console.error(`${format.toUpperCase()} export failed:`, error);
+      setExportStatus({
+        type: format,
+        status: 'error',
+        message: `${format.toUpperCase()} export failed. Please try again.`
+      });
+      
+      setTimeout(() => {
+        setExportStatus({ type: null, status: null, message: '' });
+      }, 5000);
+    } finally {
+      if (format === 'pdf') {
+        setIsExportingPDF(false);
+      } else {
+        setIsExportingWord(false);
+      }
+    }
+  }, [optimizedResume, userType, isExportingPDF, isExportingWord]);
+
   if (showMobileInterface && optimizedResume) {
     const mobileSections = [
       {
@@ -605,18 +665,17 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
                   <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 border-b border-gray-200 dark:from-dark-200 dark:to-dark-300 dark:border-dark-400">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center">
                       <FileText className="w-5 h-5 mr-2 text-green-600 dark:text-neon-cyan-400" />
-                      Optimized Resume
+                      Export Resume
                     </h2>
                   </div>
-                  <ResumePreview resumeData={optimizedResume} userType={userType} />
+                  <div className="p-6">
+                    <ResumeExportSettings
+                      resumeData={optimizedResume}
+                      userType={userType}
+                      onExport={handleExportFile}
+                    />
+                  </div>
                 </div>
-                <ExportButtons
-                  resumeData={optimizedResume}
-                  userType={userType}
-                  targetRole={targetRole}
-                  onShowProfile={onShowProfile}
-                  walletRefreshKey={walletRefreshKey}
-                />
               </>
             )}
           </div>
