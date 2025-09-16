@@ -192,7 +192,7 @@ function drawText(
 // Draw section title with underline and proper spacing
 function drawSectionTitle(state: PageState, title: string, PDF_CONFIG: any): number {
   // Add space before section title
-  state.currentY += PDF_CONFIG.spacing.sectionSpacingBefore;
+  state.currentY += 1;
 
   // Check if adding title and underline would push off page
   const estimatedSectionHeaderHeight = PDF_CONFIG.fonts.sectionTitle.size * PDF_CONFIG.spacing.lineHeight * 0.352778 + 2; // Title height + underline gap
@@ -821,7 +821,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
   const contactInfo = contactParts.join(' | ');
 
   const summaryHtml = data.summary ? `
-  <div style="margin-top: 10pt;">
+  <div style="margin-top: 5pt;">
     <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">PROFESSIONAL SUMMARY</div>
     <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
     <p style="margin-bottom: 12pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt;">${data.summary}</p>
@@ -831,7 +831,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
 
   // Updated Education HTML to use table for layout
   const educationHtml = data.education && data.education.length > 0 ? `
-    <div style="margin-top: 10pt;">
+    <div style="margin-top: 5pt;">
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">EDUCATION</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.education.map(edu => `
@@ -854,7 +854,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
 
   // Updated Work Experience HTML to use table for layout
   const workExperienceHtml = data.workExperience && data.workExperience.length > 0 ? `
-    <div style="margin-top: 10pt;">
+    <div style="margin-top: 5pt;">
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${userType === 'fresher' ? 'WORK EXPERIENCE' : 'EXPERIENCE'}</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.workExperience.map(job => `
@@ -878,7 +878,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
   ` : '';
 
   const projectsHtml = data.projects && data.projects.length > 0 ? `
-    <div style="margin-top: 10pt;">
+    <div style="margin-top: 5pt;">
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">PROJECTS</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.projects.map(project => `
@@ -895,7 +895,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
   ` : '';
 
   const skillsHtml = data.skills && data.skills.length > 0 ? `
-    <div style="margin-top: 10pt;">
+    <div style="margin-top: 5pt;">
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">SKILLS</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.skills.map(skill => `
@@ -907,7 +907,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
   ` : '';
 
   const certificationsHtml = data.certifications && data.certifications.length > 0 ? `
-    <div style="margin-top: 10pt;">
+    <div style="margin-top: 5pt;">
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">CERTIFICATIONS</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       <ul class="bullets" style="margin-left: 5mm; margin-bottom: 6pt; margin-top: 6pt; list-style-type: disc;">
@@ -940,7 +940,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
 
   // MODIFIED: Simplified to only handle achievements
   const achievementsHtml = data.achievements && data.achievements.length > 0 ? `
-    <div style="margin-top: 10pt;">
+    <div style="margin-top: 5pt;">
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">ACHIEVEMENTS</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       <ul class="bullets" style="margin-left: 7.5mm; margin-bottom: 6pt; margin-top: 2pt; list-style-type: disc;">
@@ -952,7 +952,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
   let sectionOrderHtml = '';
 
   const careerObjectiveHtml = data.careerObjective && data.careerObjective.trim() !== '' ? `
-  <div style="margin-top: 10pt;">
+  <div style="margin-top: 5pt;">
     <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">CAREER OBJECTIVE</div>
     <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
     <p style="margin-bottom: 12pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt;">${data.careerObjective}</p>
