@@ -308,29 +308,41 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
       }
       setIsOptimizing(true);
       try {
-        const parsedResume = await optimizeResume(
-          extractionResult.text,
-          jobDescription,
-          userType,
-          userName,
-          userEmail,
-          userPhone,
-          userLinkedin,
-          userGithub,
-          undefined,
-          undefined,
-          targetRole
-        );
-        setParsedResumeData(parsedResume);
-        const missing = checkForMissingSections(parsedResume);
+        // ⬇️ NEW LOGIC: prefer already-parsed + complete data; skip re-parsing if possible
+        let baseResume: ResumeData;
+
+        if (parsedResumeData && checkForMissingSections(parsedResumeData).length === 0) {
+          // Already have a complete parsed resume (perhaps after user filled missing sections)
+          baseResume = parsedResumeData;
+        } else {
+          // Parse from extractionResult.text via AI as before
+          const parsedResume = await optimizeResume(
+            extractionResult.text,
+            jobDescription,
+            userType,
+            userName,
+            userEmail,
+            userPhone,
+            userLinkedin,
+            userGithub,
+            undefined,
+            undefined,
+            targetRole
+          );
+          baseResume = parsedResume;
+          setParsedResumeData(parsedResume);
+        }
+
+        const missing = checkForMissingSections(baseResume);
         if (missing.length > 0) {
           setMissingSections(missing);
-          setPendingResumeData(parsedResume);
+          setPendingResumeData(baseResume);
           setShowMissingSectionsModal(true);
           setIsOptimizing(false);
           return;
         }
-        await continueOptimizationProcess(parsedResume, session.access_token);
+
+        await continueOptimizationProcess(baseResume, session.access_token);
       } catch (error: any) {
         console.error('Error optimizing resume:', error);
         alert('Failed to optimize resume. Please try again.');
@@ -342,7 +354,24 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
       alert(`An error occurred: ${error.message || 'Failed to validate session or check subscription.'}`);
       setIsOptimizing(false);
     }
-  }, [extractionResult, jobDescription, user, onShowAuth, userSubscription, onShowPlanSelection, userType, userName, userEmail, userPhone, userLinkedin, userGithub, targetRole, checkForMissingSections, continueOptimizationProcess]); // Dependencies for memoized function
+  }, [
+    extractionResult,
+    jobDescription,
+    user,
+    onShowAuth,
+    userSubscription,
+    onShowPlanSelection,
+    userType,
+    userName,
+    userEmail,
+    userPhone,
+    userLinkedin,
+    userGithub,
+    targetRole,
+    checkForMissingSections,
+    continueOptimizationProcess,
+    parsedResumeData // ⬅️ added dependency because we branch on it
+  ]); // Dependencies for memoized function
 
   useEffect(() => {
     setToolProcessTrigger(() => handleOptimize);
@@ -789,4 +818,3 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
 };
 
 export default ResumeOptimizer;
-
