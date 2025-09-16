@@ -495,10 +495,11 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
       subMessage = 'Our AI is evaluating your resume based on comprehensive criteria.';
     } else if (isProcessingMissingSections) {
       loadingMessage = 'Processing Your Information...';
-      subMessage = "We're updating your resume with the new sections you provided.";
+      submessage = "We're updating your resume with the new sections you provided.";
     }
     return <LoadingAnimation message={loadingMessage} submessage={subMessage} />;
   }
+
   return (
    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pb-16 dark:from-dark-50 dark:to-dark-200 transition-colors duration-300">
       <div className="container-responsive py-8">
