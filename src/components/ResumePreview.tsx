@@ -299,7 +299,15 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                   <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 2)}px` : '15.12px', listStyleType: 'none' }}>
                     {job.bullets.map((bullet, bulletIndex) => (
                       // MODIFIED: Use listItemStyle
-                      <li key={bulletIndex} style={listItemStyle}>
+                      <li key={bulletIndex} style={{
+                        ...listItemStyle,
+                        '::before': {
+                          content: '"•"',
+                          position: 'absolute',
+                          left: '0',
+                          color: 'inherit'
+                        }
+                      }}>
                         {typeof bullet === 'string' ? bullet : (bullet as any).description || JSON.stringify(bullet)}
                       </li>
                     ))}
@@ -413,15 +421,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                   <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 2)}px` : '15.12px', listStyleType: 'none' }}>
                     {project.bullets.map((bullet, bulletIndex) => (
                       // MODIFIED: Use listItemStyle
-                      <li key={bulletIndex} style={{
-                        ...listItemStyle,
-                        '::before': {
-                          content: '"•"',
-                          position: 'absolute',
-                          left: '0',
-                          color: 'inherit'
-                        }
-                      }}>
+                      <li key={bulletIndex} style={listItemStyle}>
                         {typeof bullet === 'string' ? bullet : (bullet as any).description || JSON.stringify(bullet)}
                       </li>
                     ))}
@@ -507,10 +507,9 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
             </h2>
             {!isSidebarTemplate && layoutType !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
 
-            // MODIFIED: listStyleType to 'none'
             <ul style={{ 
               marginLeft: isSidebarTemplate ? '0' : exportOptions ? `${mmToPx(exportOptions.entrySpacing * 2)}px` : '15.12px', 
-              listStyleType: 'none' // Changed from isSidebarTemplate ? 'none' : 'disc' to always 'none'
+              listStyleType: 'none'
             }}>
               {resumeData.certifications.map((cert, index) => {
                 let certText = '';
@@ -570,7 +569,6 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
             {hasAchievements && (
               <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
                 <p style={{ ...bodyTextStyle, fontWeight: 'bold', marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 0.5)}px` : '3.78px' }}>Achievements:</p>
-                // MODIFIED: listStyleType to 'none'
                 <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 3)}px` : '22.68px', listStyleType: 'none' }}>
                   {resumeData.achievements!.map((item, index) => (
                     // MODIFIED: Use listItemStyle
@@ -582,7 +580,6 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
             {hasExtraCurricular && (
               <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
                 <p style={{ ...bodyTextStyle, fontWeight: 'bold', marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 0.5)}px` : '3.78px' }}>Extra-curricular Activities:</p>
-                // MODIFIED: listStyleType to 'none'
                 <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 3)}px` : '22.68px', listStyleType: 'none' }}>
                   {resumeData.extraCurricularActivities!.map((item, index) => (
                     // MODIFIED: Use listItemStyle
@@ -594,7 +591,6 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
             {hasLanguages && (
               <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
                 <p style={{ ...bodyTextStyle, fontWeight: 'bold', marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 0.5)}px` : '3.78px' }}>Languages Known:</p>
-                // MODIFIED: listStyleType to 'none'
                 <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 3)}px` : '22.68px', listStyleType: 'none' }}>
                   {resumeData.languagesKnown!.map((item, index) => (
                     // MODIFIED: Use listItemStyle
