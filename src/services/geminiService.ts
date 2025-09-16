@@ -202,7 +202,7 @@ JSON Structure:
   ${userType === 'fresher' || userType === 'student' ? `
   "achievements": ["...", "..."],
   
-   '}
+  "personalDetails": "..."` : '}
 }
 Resume:
 ${resume}
