@@ -214,7 +214,7 @@ User Type: ${userType.toUpperCase()}
 
 LinkedIn URL provided: ${linkedinUrl || 'NONE - leave empty'}
 GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
- 
+ 
    const maxRetries = 5; // Increased from 3 to 5
    let retryCount = 3;
    let delay = 2000; // Increased from 1000 (1 second) to 2000 (2 seconds)
@@ -277,7 +277,29 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
       }
 
       try {
-      let parsedResult = JSON.parse(cleanedResult);
+        // ⬇️ CHANGED: make this mutable to allow deep cleaning reassignment
+        let parsedResult = JSON.parse(cleanedResult);
+
+        // ⬇️ ADDED: Recursive cleaner to normalize placeholder values to empty strings
+        const EMPTY_TOKEN_RE = /^(?:n\/a|not\s*specified|none)$/i;
+        const deepClean = (val: any): any => {
+          if (typeof val === 'string') {
+            const trimmed = val.trim();
+            return EMPTY_TOKEN_RE.test(trimmed) ? '' : trimmed;
+          }
+          if (Array.isArray(val)) {
+            return val.map(deepClean);
+          }
+          if (val && typeof val === 'object') {
+            const out: Record<string, any> = {};
+            for (const k of Object.keys(val)) {
+              out[k] = deepClean(val[k]);
+            }
+            return out;
+          }
+          return val;
+        };
+        parsedResult = deepClean(parsedResult);
 
         // Ensure skills have proper count values
         if (parsedResult.skills && Array.isArray(parsedResult.skills)) {
@@ -287,29 +309,32 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
           }));
         }
 
-        // Ensure certifications are strings, not objects
+        // ⬇️ CHANGED: Keep certifications as objects { title, description }
         if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
-          parsedResult.certifications = parsedResult.certifications.map((cert: any) => {
-            if (typeof cert === 'object' && cert !== null) {
-              // Handle various object formats
-              if (cert.title && cert.description) {
-                return `${cert.title} - ${cert.description}`;
-              } else if (cert.title && cert.issuer) {
-                return `${cert.title} - ${cert.issuer}`;
-              } else if (cert.title) {
-                return cert.title;
-              } else if (cert.name) {
-                return cert.name;
-              } else if (cert.description) {
-                return cert.description;
-              } else {
-                // Convert any other object structure to string
-                return Object.values(cert).filter(Boolean).join(' - ');
+          parsedResult.certifications = parsedResult.certifications
+            .map((cert: any) => {
+              if (typeof cert === 'string') {
+                return { title: cert.trim(), description: '' };
               }
-            }
-            // If it's already a string, return as is
-            return String(cert);
-          });
+              if (cert && typeof cert === 'object') {
+                const title =
+                  (typeof cert.title === 'string' && cert.title) ||
+                  (typeof cert.name === 'string' && cert.name) ||
+                  (typeof cert.certificate === 'string' && cert.certificate) ||
+                  (typeof cert.issuer === 'string' && cert.issuer) ||
+                  (typeof cert.provider === 'string' && cert.provider) ||
+                  '';
+                const description =
+                  (typeof cert.description === 'string' && cert.description) ||
+                  (typeof cert.issuer === 'string' && cert.issuer) ||
+                  (typeof cert.provider === 'string' && cert.provider) ||
+                  '';
+                if (!title && !description) return null;
+                return { title: title.trim(), description: description.trim() };
+              }
+              return { title: String(cert), description: '' };
+            })
+            .filter(Boolean);
         }
 
         // Ensure work experience is properly formatted
@@ -384,4 +409,3 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
   // If the loop finishes, it means all retries failed
   throw new Error(`Failed to optimize resume after ${maxRetries} attempts.`);
 };
-
