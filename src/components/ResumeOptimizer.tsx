@@ -667,11 +667,11 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
                       <FileText className="w-5 h-5 mr-2 text-green-600 dark:text-neon-cyan-400" />
                       Export Resume
                     </h2>
-                      <ExportButtons
-+                      resumeData={optimizedResume}
-+                      userType={userType}
-+                      // No need to pass onShowProfile or walletRefreshKey here unless ExportButtons directly uses them for its own UI
-+                    />
+                     <ExportButtons
+                    resumeData={optimizedResume}
+                      userType={userType}
+                     // No need to pass onShowProfile or walletRefreshKey here unless ExportButtons directly uses them for its own UI
+                   />
                   </div>
                   <div className="p-6">
                     <ResumeExportSettings
