@@ -1,3 +1,4 @@
+// src/components/ResumeExportSettings.tsx
 import React, { useState, useEffect } from 'react';
 import { Download, Settings, Type, Layout, Ruler, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import { ExportOptions, defaultExportOptions, LayoutType, PaperSize, layoutConfigs, paperSizeConfigs } from '../types/export';
@@ -19,7 +20,18 @@ export const ResumeExportSettings: React.FC<ResumeExportSettingsProps> = ({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleOptionChange = (key: keyof ExportOptions, value: any) => {
-    setOptions(prev => ({ ...prev, [key]: value }));
+    setOptions(prev => {
+      const newOptions = { ...prev, [key]: value };
+
+      if (key === 'layoutType') {
+        const selectedLayoutConfig = layoutConfigs[value as LayoutType];
+        newOptions.sectionSpacing = selectedLayoutConfig.spacing.section;
+        newOptions.entrySpacing = selectedLayoutConfig.spacing.entry;
+        // Update margins based on the selected layout
+        newOptions.margins = selectedLayoutConfig.margins;
+      }
+      return newOptions;
+    });
   };
 
   const handleExportClick = (format: 'pdf' | 'word') => {
@@ -231,7 +243,7 @@ export const ResumeExportSettings: React.FC<ResumeExportSettingsProps> = ({
                 ? 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-500/50 dark:text-red-300' 
                 : 'bg-green-50 border-green-200 text-green-800 dark:bg-neon-cyan-500/10 dark:border-neon-cyan-400/50 dark:text-neon-cyan-300'
             }`}>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center">
                 {statusMessage.includes('Error') ? <AlertCircle className="w-4 h-4 flex-shrink-0" /> : <CheckCircle className="w-4 h-4 flex-shrink-0" />}
                 <span className="text-sm font-medium">{statusMessage}</span>
               </div>
@@ -262,3 +274,4 @@ export const ResumeExportSettings: React.FC<ResumeExportSettingsProps> = ({
     </div>
   );
 };
+
