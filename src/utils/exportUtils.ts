@@ -442,8 +442,8 @@ function drawProjects(state: PageState, projects: any[], PDF_CONFIG: any): numbe
 
     // Add space between projects (except for the last one)
     if (index < projects.length - 1) {
-      state.currentY += PDF_CONFIG.spacing.afterSubsection;
-      totalHeight += PDF_CONFIG.spacing.afterSubsection;
+      state.currentY += 1;
+      totalHeight += 1;
     }
   });
 
