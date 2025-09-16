@@ -297,7 +297,8 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
       maxWidth: PDF_CONFIG.contentWidth - yearWidth - 5 // leave 5mm gap
     });
 
-    state.currentY += 1; // Small gap before bullets
+    // MODIFIED: Make gap consistent with bullet spacing
+    state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
 
     // Add spacing before bullet list
     if (job.bullets && job.bullets.length > 0) {
@@ -421,7 +422,8 @@ function drawProjects(state: PageState, projects: any[], PDF_CONFIG: any): numbe
     });
 
     totalHeight += titleHeight;
-    state.currentY += 2; // Small gap before bullets
+    // MODIFIED: Make gap consistent with bullet spacing
+    state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
 
     // Add spacing before bullet list
     if (project.bullets && project.bullets.length > 0) {
@@ -856,7 +858,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <div class="section-title" style="font-size: 10pt; font-weight: bold; margin-bottom: 4pt; text-transform: uppercase; letter-spacing: 0.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${userType === 'fresher' ? 'WORK EXPERIENCE' : 'EXPERIENCE'}</div>
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.workExperience.map(job => `
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 6pt;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 2pt;">
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
               <div class="job-title" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><b style="font-weight: bold;">${job.role}</b> | ${job.company}${job.location ? `, ${job.location}` : ''}</div>
@@ -867,7 +869,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
           </tr>
         </table>
         ${job.bullets && job.bullets.length > 0 ? `
-          <ul class="bullets" style="margin-left: 5mm; margin-bottom: 6pt; margin-top: 6pt; list-style-type: disc;">
+          <ul class="bullets" style="margin-left: 5mm; margin-bottom: 6pt; margin-top: 2pt; list-style-type: disc;">
             ${job.bullets.map(bullet => `<li class="bullet" style="font-size: 9.5pt; line-height: 1.4; margin: 0 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${bullet}</li>`).join('')}
           </ul>
         ` : ''}
@@ -881,9 +883,9 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <div class="section-underline" style="border-bottom: 0.5pt solid #808080; margin-bottom: 4pt; height: 1px;"></div>
       ${data.projects.map(project => `
         <div style="margin-bottom: 6pt;">
-          <div class="project-title" style="font-size: 9.5pt; font-weight: bold; margin-bottom: 2pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${project.title}</div>
+          <div class="project-title" style="font-size: 9.5pt; font-weight: bold; margin-bottom: 1pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${project.title}</div>
           ${project.bullets && project.bullets.length > 0 ? `
-            <ul class="bullets" style="margin-left: 5mm; margin-bottom: 6pt; margin-top: 6pt; list-style-type: disc;">
+            <ul class="bullets" style="margin-left: 5mm; margin-bottom: 6pt; margin-top: 2pt; list-style-type: disc;">
               ${project.bullets.map(bullet => `<li class="bullet" style="font-size: 9.5pt; line-height: 1.4; margin: 0 0 2pt 0; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${bullet}</li>`).join('')}
             </ul>
           ` : ''}
