@@ -63,6 +63,19 @@ interface PageState {
   doc: jsPDF;
 }
 
+// MODIFIED: Updated helper function to be more robust
+const isValidField = (field?: string | null): boolean => {
+  if (!field || field.trim() === '') {
+    return false;
+  }
+  const lowercasedField = field.trim().toLowerCase();
+  const invalidValues = ['n/a', 'not specified', 'none'];
+  if (invalidValues.includes(lowercasedField)) {
+    return false;
+  }
+  return true;
+};
+
 // Helper function to detect mobile device
 const isMobileDevice = (): boolean => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -226,21 +239,20 @@ function drawSectionTitle(state: PageState, title: string, PDF_CONFIG: any): num
 function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: any): number {
   const contactParts: string[] = [];
 
-  // Only add location if it exists
-  if (resumeData.location) {
-    contactParts.push(`${resumeData.location}`);
+  if (isValidField(resumeData.location)) {
+    contactParts.push(resumeData.location!);
   }
-  if (resumeData.phone) {
-    contactParts.push(`${resumeData.phone}`);
+  if (isValidField(resumeData.phone)) {
+    contactParts.push(resumeData.phone);
   }
-  if (resumeData.email) {
-    contactParts.push(`${resumeData.email}`);
+  if (isValidField(resumeData.email)) {
+    contactParts.push(resumeData.email);
   }
-  if (resumeData.linkedin) {
-    contactParts.push(`${resumeData.linkedin}`);
+  if (isValidField(resumeData.linkedin)) {
+    contactParts.push(resumeData.linkedin);
   }
-  if (resumeData.github) {
-    contactParts.push(`${resumeData.github}`);
+  if (isValidField(resumeData.github)) {
+    contactParts.push(resumeData.github);
   }
 
   if (contactParts.length === 0) return 0;
@@ -266,41 +278,34 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
   let totalHeight = drawSectionTitle(state, sectionTitle, PDF_CONFIG);
 
   workExperience.forEach((job, index) => {
-    // Check if we need space for at least the job header and one bullet
     const estimatedJobHeaderHeight = (PDF_CONFIG.fonts.jobTitle.size) * PDF_CONFIG.spacing.lineHeight * 0.352778;
     const estimatedMinBulletHeight = PDF_CONFIG.fonts.body.size * PDF_CONFIG.spacing.lineHeight * 0.352778;
     if (!checkPageSpace(state, estimatedJobHeaderHeight + estimatedMinBulletHeight + PDF_CONFIG.spacing.bulletListSpacing * 2 + PDF_CONFIG.spacing.afterSubsection, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
     }
 
-    // Capture Y before drawing job details for year alignment
     const initialYForJob = state.currentY;
 
-    // MODIFIED: Combine Role, Company, and Location into a single string
-    const combinedTitle = `${job.role} | ${job.company}${job.location ? `, ${job.location}` : ''}`;
+    const combinedTitle = `${job.role} | ${job.company}${isValidField(job.location) ? `, ${job.location}` : ''}`;
 
-    // Draw Year (right-aligned) first to calculate its width
     const yearText = job.year;
-    state.doc.setFont(PDF_CONFIG.fontFamily, 'bold'); // Year is bold
+    state.doc.setFont(PDF_CONFIG.fontFamily, 'bold');
     state.doc.setFontSize(PDF_CONFIG.fonts.year.size);
     const yearWidth = state.doc.getTextWidth(yearText);
     const yearX = PDF_CONFIG.margins.left + PDF_CONFIG.contentWidth - yearWidth;
     const yearY = initialYForJob + (PDF_CONFIG.fonts.jobTitle.size * 0.352778 * 0.5);
     
     state.doc.text(yearText, yearX, yearY);
-    state.doc.setFont(PDF_CONFIG.fontFamily, 'normal'); // Reset font weight
+    state.doc.setFont(PDF_CONFIG.fontFamily, 'normal');
 
-    // Draw the combined title string
     drawText(state, combinedTitle, PDF_CONFIG.margins.left, PDF_CONFIG, {
       fontSize: PDF_CONFIG.fonts.jobTitle.size,
-      fontWeight: 'normal', // Use normal weight as role is not bold in combined string
-      maxWidth: PDF_CONFIG.contentWidth - yearWidth - 5 // leave 5mm gap
+      fontWeight: 'normal',
+      maxWidth: PDF_CONFIG.contentWidth - yearWidth - 5
     });
 
-    // MODIFIED: Make gap consistent with bullet spacing
     state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
 
-    // Add spacing before bullet list
     if (job.bullets && job.bullets.length > 0) {
       state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
 
@@ -316,7 +321,6 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
       state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
     }
 
-    // Add space between jobs (except for the last one)
     if (index < workExperience.length - 1) {
       state.currentY += 1;
       totalHeight += 1;
@@ -333,9 +337,7 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
   let totalHeight = drawSectionTitle(state, 'EDUCATION', PDF_CONFIG);
 
   education.forEach((edu, index) => {
-    // ADDED: Capture initial Y position for this education entry
-    // This ensures yearY is calculated relative to the start of the current education block.
-    const initialYForEdu = state.currentY; // <--- FIX: Defined initialYForEdu here
+    const initialYForEdu = state.currentY;
 
     if (!checkPageSpace(state, 20, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
@@ -346,15 +348,15 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
       fontWeight: PDF_CONFIG.fonts.jobTitle.weight
     });
 
-    const schoolHeight = drawText(state, edu.school, PDF_CONFIG.margins.left, PDF_CONFIG, {
+    const schoolText = `${edu.school}${isValidField(edu.location) ? `, ${edu.location}` : ''}`;
+    const schoolHeight = drawText(state, schoolText, PDF_CONFIG.margins.left, PDF_CONFIG, {
       fontSize: PDF_CONFIG.fonts.company.size,
       fontWeight: PDF_CONFIG.fonts.company.weight,
       color: PDF_CONFIG.colors.primary
     });
 
-    // Add CGPA if present
     let cgpaHeight = 0;
-    if (edu.cgpa) {
+    if (isValidField(edu.cgpa)) {
       cgpaHeight = drawText(state, `CGPA: ${edu.cgpa}`, PDF_CONFIG.margins.left, PDF_CONFIG, {
         fontSize: PDF_CONFIG.fonts.body.size,
         fontWeight: PDF_CONFIG.fonts.body.weight,
@@ -362,7 +364,6 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
       });
     }
 
-    // Relevant Coursework
     if (edu.relevantCoursework && edu.relevantCoursework.length > 0) {
       const courseworkText = `Relevant Coursework: ${edu.relevantCoursework.join(', ')}`;
       const courseworkHeight = drawText(state, courseworkText, PDF_CONFIG.margins.left, PDF_CONFIG, {
@@ -374,19 +375,17 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
       totalHeight += courseworkHeight;
     }
 
-
     state.doc.setFont(PDF_CONFIG.fontFamily, 'normal');
     state.doc.setFontSize(PDF_CONFIG.fonts.year.size);
     state.doc.setTextColor(PDF_CONFIG.colors.primary[0], PDF_CONFIG.colors.primary[1], PDF_CONFIG.colors.primary[2]);
 
     const yearWidth = state.doc.getTextWidth(edu.year);
     const yearX = PDF_CONFIG.margins.left + PDF_CONFIG.contentWidth - yearWidth;
-    const yearY = initialYForEdu + (PDF_CONFIG.fonts.jobTitle.size * 0.352778 * 0.5); // Better vertical centering with degree title
+    const yearY = initialYForEdu + (PDF_CONFIG.fonts.jobTitle.size * 0.352778 * 0.5);
 
-    // MODIFIED: Make year bold for PDF
     state.doc.setFont(PDF_CONFIG.fontFamily, 'bold');
     state.doc.text(edu.year, yearX, yearY);
-    state.doc.setFont(PDF_CONFIG.fontFamily, 'normal'); // Reset font weight
+    state.doc.setFont(PDF_CONFIG.fontFamily, 'normal');
 
     totalHeight += degreeHeight + schoolHeight + cgpaHeight;
 
@@ -404,28 +403,23 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
 function drawProjects(state: PageState, projects: any[], PDF_CONFIG: any): number {
   if (!projects || projects.length === 0) return 0;
 
-  // Collect GitHub URLs for referenced projects section
   const githubProjects = projects.filter(project => project.githubUrl);
 
   let totalHeight = drawSectionTitle(state, 'PROJECTS', PDF_CONFIG);
 
   projects.forEach((project, index) => {
-    // Check space for project title and at least one bullet
     if (!checkPageSpace(state, 25, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
     }
 
-    // Project title
     const titleHeight = drawText(state, project.title, PDF_CONFIG.margins.left, PDF_CONFIG, {
       fontSize: PDF_CONFIG.fonts.jobTitle.size,
       fontWeight: PDF_CONFIG.fonts.jobTitle.weight
     });
 
     totalHeight += titleHeight;
-    // MODIFIED: Make gap consistent with bullet spacing
     state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
 
-    // Add spacing before bullet list
     if (project.bullets && project.bullets.length > 0) {
       state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
 
@@ -438,11 +432,9 @@ function drawProjects(state: PageState, projects: any[], PDF_CONFIG: any): numbe
         totalHeight += bulletHeight;
       });
 
-      // Add spacing after bullet list
       state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
     }
 
-    // Add space between projects (except for the last one)
     if (index < projects.length - 1) {
       state.currentY += 1;
       totalHeight += 1;
@@ -452,22 +444,15 @@ function drawProjects(state: PageState, projects: any[], PDF_CONFIG: any): numbe
   return totalHeight;
 }
 
-// drawGitHubReferences function and its call have been removed as per requirement.
-// It will not be present in this file.
-
 
 // Draw skills section
 function drawSkills(state: PageState, skills: any[], PDF_CONFIG: any): number {
   if (!skills || skills.length === 0) return 0;
 
   let totalHeight = drawSectionTitle(state, 'SKILLS', PDF_CONFIG);
-
-  // ADDED: Define estimatedSkillLineHeight
-  // This calculation is crucial for correct line spacing in multi-line skill lists.
-  const estimatedSkillLineHeight = PDF_CONFIG.fonts.body.size * PDF_CONFIG.spacing.lineHeight * 0.352778; // <--- FIX: Defined estimatedSkillLineHeight here
+  const estimatedSkillLineHeight = PDF_CONFIG.fonts.body.size * PDF_CONFIG.spacing.lineHeight * 0.352778;
 
   skills.forEach((skill, index) => {
-    // Check space
     if (!checkPageSpace(state, 15, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
     }
@@ -481,13 +466,9 @@ function drawSkills(state: PageState, skills: any[], PDF_CONFIG: any): number {
     state.doc.setTextColor(PDF_CONFIG.colors.primary[0], PDF_CONFIG.colors.primary[1], PDF_CONFIG.colors.primary[2]);
 
     const categoryWidth = state.doc.getTextWidth(categoryText);
-
-    // Draw bold category text
     state.doc.text(categoryText, x, state.currentY);
-
     state.doc.setFont(PDF_CONFIG.fontFamily, 'normal');
 
-    // Draw normal-weight list text right after category
     const remainingWidth = PDF_CONFIG.contentWidth - categoryWidth;
     const lines = state.doc.splitTextToSize(listText, remainingWidth);
 
@@ -495,15 +476,13 @@ function drawSkills(state: PageState, skills: any[], PDF_CONFIG: any): number {
         if (lineIndex === 0) {
             state.doc.text(line, x + categoryWidth, state.currentY);
         } else {
-            // For subsequent lines, draw from the beginning of the content area
             state.doc.text(line, x, state.currentY + (lineIndex * estimatedSkillLineHeight));
         }
     });
 
-    state.currentY += lines.length * estimatedSkillLineHeight; // Advance Y by total height of drawn lines
+    state.currentY += lines.length * estimatedSkillLineHeight;
     totalHeight += lines.length * estimatedSkillLineHeight;
 
-    // Add small space between skill categories
     if (index < skills.length - 1) {
       state.currentY += 1;
       totalHeight += 1;
@@ -526,7 +505,6 @@ function drawCertifications(state: PageState, certifications: (string | Certific
     }
 
     if (typeof cert === 'object' && cert !== null && cert.title) {
-      // Handle object with title and description
       const titleText = `• ${cert.title}`;
       const titleHeight = drawText(state, titleText, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
         fontWeight: 'bold',
@@ -542,7 +520,6 @@ function drawCertifications(state: PageState, certifications: (string | Certific
         totalHeight += descHeight + 1;
       }
     } else {
-      // Handle simple string
       const bulletText = `• ${String(cert)}`;
       const certHeight = drawText(state, bulletText, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
         fontSize: PDF_CONFIG.fonts.body.size,
@@ -550,7 +527,7 @@ function drawCertifications(state: PageState, certifications: (string | Certific
       });
       totalHeight += certHeight;
     }
-    state.currentY += PDF_CONFIG.spacing.bulletListSpacing; // Space between entries
+    state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
   });
 
   return totalHeight;
@@ -562,8 +539,6 @@ function drawProfessionalSummary(state: PageState, summary: string, PDF_CONFIG: 
 
   let totalHeight = drawSectionTitle(state, 'PROFESSIONAL SUMMARY', PDF_CONFIG);
 
-  // Removed: state.currentY += 3; // Add 3pt spacing before summary text
-
   const summaryHeight = drawText(state, summary, PDF_CONFIG.margins.left, PDF_CONFIG, {
     fontSize: PDF_CONFIG.fonts.body.size,
     fontWeight: PDF_CONFIG.fonts.body.weight,
@@ -571,7 +546,7 @@ function drawProfessionalSummary(state: PageState, summary: string, PDF_CONFIG: 
   });
 
   totalHeight += summaryHeight;
-  state.currentY += 3; // Add small space after summary
+  state.currentY += 3;
   return totalHeight;
 }
 
@@ -580,8 +555,6 @@ function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: an
   if (!objective) return 0;
 
   let totalHeight = drawSectionTitle(state, 'CAREER OBJECTIVE', PDF_CONFIG);
-
-  // Add 3pt spacing before objective text
   state.currentY += 3;
 
   const objectiveHeight = drawText(state, objective, PDF_CONFIG.margins.left, PDF_CONFIG, {
@@ -591,7 +564,7 @@ function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: an
   });
 
   totalHeight += objectiveHeight;
-  state.currentY += 3; // Add small space after objective
+  state.currentY += 3;
   return totalHeight;
 }
 
@@ -613,7 +586,7 @@ function drawAchievementsAndExtras(state: PageState, resumeData: ResumeData, PDF
     totalHeight += itemHeight;
   });
 
-  state.currentY += 2; // Small space after the list
+  state.currentY += 2;
   return totalHeight;
 }
 
@@ -657,17 +630,7 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
     state.currentY += PDF_CONFIG.spacing.afterName;
 
     drawContactInfo(state, resumeData, PDF_CONFIG);
-
-    // MODIFIED: Remove separator line
-    // const separatorY = state.currentY;
-    // doc.setDrawColor(0, 0, 0);
-    // doc.setLineWidth(0.4);
-    // doc.line(
-    //   PDF_CONFIG.margins.left,
-    //   separatorY,
-    //   PDF_CONFIG.pageWidth - PDF_CONFIG.margins.right,
-    //   separatorY
-    // );
+    
     state.currentY += 3;
 
     if (resumeData.summary && resumeData.summary.trim() !== '') {
