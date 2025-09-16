@@ -95,25 +95,39 @@ const isValidField = (
   field?: string | null,
   fieldType: 'phone' | 'email' | 'url' | 'text' = 'text'
 ): boolean => {
-  if (!field || field.trim() === '') return false;
-  const lower = field.trim().toLowerCase();
-  const invalidValues = ['n/a', 'not specified', 'none'];
-  if (invalidValues.includes(lower)) return false;
+  console.log(`[isValidField] Checking field: "${field}" | type: ${fieldType}`);
+  let result = true;
 
-  switch (fieldType) {
-    case 'phone': {
-      // Looser validation for phone numbers: just check for at least 7 digits
-      const digitCount = (field.match(/\d/g) || []).length;
-      return digitCount >= 7;
+  if (!field || field.trim() === '') {
+    result = false;
+  } else {
+    const lower = field.trim().toLowerCase();
+    const invalidValues = ['n/a', 'not specified', 'none'];
+    if (invalidValues.includes(lower)) {
+      result = false;
+    } else {
+      switch (fieldType) {
+        case 'phone': {
+          const digitCount = (field.match(/\d/g) || []).length;
+          result = digitCount >= 7;
+          break;
+        }
+        case 'email':
+          result = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field);
+          break;
+        case 'url':
+          result = /^https?:\/\//.test(field);
+          break;
+        case 'text':
+        default:
+          result = true;
+          break;
+      }
     }
-    case 'email':
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field);
-    case 'url':
-      return /^https?:\/\//.test(field);
-    case 'text':
-    default:
-      return true;
   }
+  
+  console.log(`[isValidField] Result for "${field}": ${result}`);
+  return result;
 };
 
 const isMobileDevice = (): boolean =>
@@ -263,12 +277,14 @@ function drawSectionTitle(state: PageState, title: string, PDF_CONFIG: any): num
 
 // Contact info (centered)
 function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: any): number {
+  console.log('[drawContactInfo] Received resumeData:', resumeData);
   const contactParts: string[] = [];
 
   const add = (
     fieldValue?: string | null,
     fieldType: 'phone' | 'email' | 'url' | 'text' = 'text'
   ) => {
+    console.log(`[drawContactInfo] Adding field: "${fieldValue}" | type: ${fieldType}`);
     const safeFieldValue = toSafeText(fieldValue);
     if (!safeFieldValue) return;
 
