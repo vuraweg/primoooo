@@ -874,9 +874,8 @@ const generateWordHTMLContent = (
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
               <div class="degree" style="font-size: 9.5pt; font-weight: bold; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.degree || ''}</div>
-              <div class="school" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.school || ''}${
-            isValidField(edu.location) ? `, ${edu.location}` : ''
-          }</div>
+              <div class="school" style="...">${edu.school || ''}${isValidField(edu.location) ? `, ${edu.location}` : ''}</div>
+
               ${
                 isValidField(edu.cgpa)
                   ? `<div style="font-size: 9.5pt; color: #4B5563; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">CGPA: ${edu.cgpa}</div>`
