@@ -1,8 +1,8 @@
 import jsPDF from 'jspdf';
-import { ResumeData } from '../types/resume';
+import { ResumeData, Certification } from '../types/resume'; // Import Certification type
 import { saveAs } from 'file-saver';
 import { ExportOptions, defaultExportOptions } from '../types/export';
-import { UserType } from '../types/resume'; // Import UserType if not already there
+import { UserType } from '../types/resume';
 
 // Professional PDF Layout Constants - Updated to meet specifications
 const createPDFConfig = (options: ExportOptions) => ({
@@ -515,47 +515,43 @@ function drawSkills(state: PageState, skills: any[], PDF_CONFIG: any): number {
 
 
 // Draw certifications section
-function drawCertifications(state: PageState, certifications: any[], PDF_CONFIG: any): number {
+function drawCertifications(state: PageState, certifications: (string | Certification)[], PDF_CONFIG: any): number {
   if (!certifications || certifications.length === 0) return 0;
 
   let totalHeight = drawSectionTitle(state, 'CERTIFICATIONS', PDF_CONFIG);
 
-  // Add spacing before bullet list
-  state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
-
   certifications.forEach((cert) => {
-    // Check space
     if (!checkPageSpace(state, 10, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
     }
 
-    let certText = '';
-    if (typeof cert === 'string') {
-      certText = cert;
-    } else if (cert && typeof cert === 'object') {
-      // Handle object format with title and issuer
-      if ('title' in cert && 'issuer' in cert) {
-        certText = `${cert.title} - ${cert.issuer}`;
-      } else if ('name' in cert) {
-        certText = cert.name;
-      } else {
-        certText = JSON.stringify(cert);
+    if (typeof cert === 'object' && cert !== null && cert.title) {
+      // Handle object with title and description
+      const titleText = `• ${cert.title}`;
+      const titleHeight = drawText(state, titleText, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
+        fontWeight: 'bold',
+        maxWidth: PDF_CONFIG.contentWidth - PDF_CONFIG.spacing.bulletIndent
+      });
+      totalHeight += titleHeight;
+
+      if (cert.description) {
+        state.currentY += 1; // Small gap
+        const descHeight = drawText(state, cert.description, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent * 2, PDF_CONFIG, {
+          maxWidth: PDF_CONFIG.contentWidth - (PDF_CONFIG.spacing.bulletIndent * 2)
+        });
+        totalHeight += descHeight + 1;
       }
     } else {
-      certText = String(cert);
+      // Handle simple string
+      const bulletText = `• ${String(cert)}`;
+      const certHeight = drawText(state, bulletText, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
+        fontSize: PDF_CONFIG.fonts.body.size,
+        maxWidth: PDF_CONFIG.contentWidth - PDF_CONFIG.spacing.bulletIndent
+      });
+      totalHeight += certHeight;
     }
-
-    const bulletText = `• ${certText}`;
-    const certHeight = drawText(state, bulletText, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
-      fontSize: PDF_CONFIG.fonts.body.size,
-      maxWidth: PDF_CONFIG.contentWidth - PDF_CONFIG.spacing.bulletIndent
-    });
-
-    totalHeight += certHeight;
+    state.currentY += PDF_CONFIG.spacing.bulletListSpacing; // Space between entries
   });
-
-  // Add spacing after bullet list
-  state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
 
   return totalHeight;
 }
@@ -913,22 +909,10 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <ul class="bullets" style="margin-left: 5mm; margin-bottom: 6pt; margin-top: 6pt; list-style-type: disc;">
         ${data.certifications.map(cert => {
           let certText = '';
-          if (typeof cert === 'string') {
-            certText = cert;
-          } else if (cert && typeof cert === 'object') {
-            if ('title' in cert && 'description' in cert) {
-              certText = `${cert.title} - ${cert.description}`;
-            } else if ('title' in cert && 'issuer' in cert) {
-              certText = `${cert.title} - ${cert.issuer}`;
-            } else if ('name' in cert) {
-              certText = cert.name;
-            } else if ('title' in cert) {
-              certText = cert.title;
-            } else if ('description' in cert) {
-              certText = cert.description;
-            } else {
-              certText = Object.values(cert).filter(Boolean).join(' - ');
-            }
+          if (typeof cert === 'object' && cert !== null && cert.title) {
+            const title = `<b style="font-weight: bold;">${cert.title}</b>`;
+            const description = cert.description ? ` - ${cert.description}` : '';
+            certText = `${title}${description}`;
           } else {
             certText = String(cert);
           }
@@ -1125,7 +1109,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
       <div class="header">
         <div class="name">${data.name.toUpperCase()}</div>
         ${contactInfo ? `<div class="contact">${contactInfo}</div>` : ''}
-        
+        <hr class="header-line">
       </div>
 
       ${sectionOrderHtml}
