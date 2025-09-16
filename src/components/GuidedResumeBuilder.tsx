@@ -705,8 +705,8 @@ const WorkExperienceStep: React.FC<{
   };
 
   const sectionTitle = userType === 'student' ? 'Internships & Training' : 
-                     userType === 'fresher' ? 'Internships & Work Experience' : 
-                     'Professional Experience';
+                       userType === 'fresher' ? 'Internships & Work Experience' : 
+                       'Professional Experience';
 
   return (
     <div className="space-y-6">
@@ -1165,6 +1165,95 @@ const ReviewStep: React.FC<{
             <div className="text-sm text-gray-600 dark:text-gray-300">Skill Categories</div>
           </div>
         </div>
+      </div>
+
+      {/* Detailed Review Section */}
+      <div className="space-y-8 mt-8 border-t pt-8 dark:border-dark-300">
+        {/* Personal Information */}
+        <div className="bg-gray-50 dark:bg-dark-200 p-4 rounded-lg">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center"><User className="w-5 h-5 mr-2" />Personal Information</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700 dark:text-gray-300">
+            <p><strong>Name:</strong> {resumeData.name}</p>
+            <p><strong>Email:</strong> {resumeData.email}</p>
+            <p><strong>Phone:</strong> {resumeData.phone}</p>
+            {resumeData.location && <p><strong>Location:</strong> {resumeData.location}</p>}
+            {resumeData.linkedin && <p><strong>LinkedIn:</strong> {resumeData.linkedin}</p>}
+            {resumeData.github && <p><strong>GitHub:</strong> {resumeData.github}</p>}
+            {resumeData.targetRole && <p><strong>Target Role:</strong> {resumeData.targetRole}</p>}
+          </div>
+        </div>
+
+        {/* Education */}
+        {resumeData.education.length > 0 && (
+          <div className="bg-gray-50 dark:bg-dark-200 p-4 rounded-lg">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center"><GraduationCap className="w-5 h-5 mr-2" />Education</h4>
+            <div className="space-y-4">
+              {resumeData.education.map((edu, index) => (
+                <div key={index} className="border-l-4 border-blue-500 pl-4 text-sm text-gray-700 dark:text-gray-300">
+                  <p><strong>{edu.degree}</strong></p>
+                  <p>{edu.school}</p>
+                  <p className="text-gray-500">{edu.year}</p>
+                  {edu.cgpa && <p className="text-gray-500">CGPA: {edu.cgpa}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Work Experience */}
+        {resumeData.workExperience.length > 0 && (
+          <div className="bg-gray-50 dark:bg-dark-200 p-4 rounded-lg">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center"><Briefcase className="w-5 h-5 mr-2" />Work Experience</h4>
+            <div className="space-y-4">
+              {resumeData.workExperience.map((work, index) => (
+                <div key={index} className="border-l-4 border-green-500 pl-4 text-sm text-gray-700 dark:text-gray-300">
+                  <p><strong>{work.role}</strong> at {work.company}</p>
+                  <p className="text-gray-500">{work.year}</p>
+                  {work.bullets.some(b => b.trim()) && (
+                    <ul className="list-disc list-inside mt-1 text-gray-600 dark:text-gray-400">
+                      {work.bullets.map((bullet, bIndex) => bullet && <li key={bIndex}>{bullet}</li>)}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Projects */}
+        {resumeData.projects.length > 0 && (
+          <div className="bg-gray-50 dark:bg-dark-200 p-4 rounded-lg">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center"><Code className="w-5 h-5 mr-2" />Projects</h4>
+            <div className="space-y-4">
+              {resumeData.projects.map((project, index) => (
+                <div key={index} className="border-l-4 border-purple-500 pl-4 text-sm text-gray-700 dark:text-gray-300">
+                  <p><strong>{project.title}</strong></p>
+                  {project.bullets.some(b => b.trim()) && (
+                    <ul className="list-disc list-inside mt-1 text-gray-600 dark:text-gray-400">
+                      {project.bullets.map((bullet, bIndex) => bullet && <li key={bIndex}>{bullet}</li>)}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Skills */}
+        {resumeData.skills.length > 0 && (
+          <div className="bg-gray-50 dark:bg-dark-200 p-4 rounded-lg">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center"><Target className="w-5 h-5 mr-2" />Skills</h4>
+            <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+              {resumeData.skills.map((skillCat, index) => (
+                skillCat.list.length > 0 && (
+                  <div key={index}>
+                    <p><strong>{skillCat.category}:</strong> {skillCat.list.join(', ')}</p>
+                  </div>
+                )
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="text-center">
