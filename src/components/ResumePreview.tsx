@@ -14,6 +14,9 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
   userType = 'experienced',
   exportOptions
 }) => {
+  const layoutType = exportOptions?.layoutType || 'standard';
+  const paperSize = exportOptions?.paperSize || 'a4';
+
   // Debug logging to check what data we're receiving
   console.log('ResumePreview received data:', resumeData);
 
@@ -54,9 +57,9 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
     marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.4)}px` : '5.33px',
     marginTop: exportOptions ? `${mmToPx(exportOptions.sectionSpacing)}px` : '11.34px',
     fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-    letterSpacing: '0.5pt',
-    textTransform: exportOptions?.template === 'minimalist' ? 'none' : 'uppercase',
-    ...(exportOptions?.template === 'minimalist' && {
+    letterSpacing: '0.5pt', // This is a constant value, not dependent on template
+    textTransform: layoutType === 'minimalist' ? 'none' : 'uppercase',
+    ...(layoutType === 'minimalist' && {
       borderBottom: '1px solid #e5e7eb',
       paddingBottom: '4px'
     })
@@ -140,7 +143,6 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   // Define section order based on user type
   const getSectionOrder = () => {
-    const layoutType = exportOptions?.layoutType || 'standard';
     
     // Fallback to user type based ordering
     if (userType === 'experienced') {
@@ -160,8 +162,8 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
 
     switch (sectionName) {
       case 'summary':
-        // Conditional logic for 'Professional Summary' or 'Career Objective'
-        const summaryTemplate = exportOptions?.template || 'chronological';
+        // Conditional logic for 'Professional Summary' or 'Career Objective' based on layoutType
+        const summaryLayout = layoutType;
         
         if (userType === 'student') {
           if (!resumeData.careerObjective || resumeData.careerObjective.trim() === '') return null;
@@ -169,8 +171,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
             <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
               <h2 style={sectionTitleStyle}>
                 CAREER OBJECTIVE
-              </h2>
-              {summaryTemplate !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
+              </h2> {/* No template-specific underline for objective */}
               <p style={{ ...bodyTextStyle, marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
                 {resumeData.careerObjective}
               </p>
@@ -181,16 +182,16 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
           return (
             <div style={{ 
               marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px',
-              ...(summaryTemplate === 'functional' && {
+              ...(summaryLayout === 'compact' && { // Apply compact styling for summary
                 backgroundColor: '#f8f9fa',
                 padding: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px',
                 borderRadius: '4px'
               })
             }}>
               <h2 style={sectionTitleStyle}>
-                {summaryTemplate === 'functional' ? 'PROFESSIONAL PROFILE' : 'PROFESSIONAL SUMMARY'}
+                PROFESSIONAL SUMMARY
               </h2>
-              {summaryTemplate !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
+              {summaryLayout !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
               <p style={{ ...bodyTextStyle, marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing)}px` : '7.56px' }}>
                 {resumeData.summary}
               </p>
@@ -201,7 +202,6 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
       case 'workExperience':
         if (!resumeData.workExperience || resumeData.workExperience.length === 0) return null;
         
-        const layoutType = exportOptions?.layoutType || 'standard';
         const isCompactLayout = layoutType === 'compact';
         
         return (
@@ -398,8 +398,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                     <div style={{
                       fontSize: exportOptions ? `${ptToPx(exportOptions.subHeaderSize)}px` : '12.67px',
                       fontWeight: 'bold',
-                      fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                      marginBottom: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 0.25)}px` : '1.89px'
+                      fontFamily: exportOptions ? `${exportOptions.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif` : 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
                     }}>
                       {skill.category}
                     </div>
@@ -446,7 +445,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
             <h2 style={sectionTitleStyle}>
               CERTIFICATIONS
             </h2>
-            {!isSidebarTemplate && exportOptions?.template !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
+            {!isSidebarTemplate && layoutType !== 'minimalist' && <div style={sectionUnderlineStyle}></div>}
 
             // MODIFIED: listStyleType to 'none'
             <ul style={{ 
@@ -560,9 +559,9 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
 
   return (
     <div className={`card dark:bg-dark-100 dark:border-dark-300 resume-one-column ${
-      exportOptions?.layoutType === 'compact' ? 'resume-compact' : 'resume-standard'
-    } ${
-      exportOptions?.paperSize === 'letter' ? 'resume-letter' : 'resume-a4'
+      layoutType === 'compact' ? 'resume-compact' : 'resume-standard'
+    } ${ // Use the local layoutType and paperSize variables
+      paperSize === 'letter' ? 'resume-letter' : 'resume-a4'
     }`}>
       <div
         className="pt-4 px-4 pb-6 sm:pt-6 sm:px-6 sm:pb-8 lg:px-8 max-h-[70vh] sm:max-h-[80vh] lg:max-h-[800px] overflow-y-auto dark:bg-dark-100"
