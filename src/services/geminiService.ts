@@ -277,7 +277,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
       }
 
       try {
-        const parsedResult = JSON.parse(cleanedResult);
+      let parsedResult = JSON.parse(cleanedResult);
 
         // Ensure skills have proper count values
         if (parsedResult.skills && Array.isArray(parsedResult.skills)) {
