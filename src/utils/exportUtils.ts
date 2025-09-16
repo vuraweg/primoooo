@@ -63,7 +63,6 @@ interface PageState {
   doc: jsPDF;
 }
 
-// NEW: Helper function to validate fields
 const isValidField = (field?: string | null, fieldType: 'phone' | 'email' | 'url' | 'text' = 'text'): boolean => {
   if (!field || field.trim() === '') {
     return false;
@@ -96,7 +95,6 @@ const isMobileDevice = (): boolean => {
 // Helper function to trigger download on mobile
 const triggerMobileDownload = (blob: Blob, filename: string): void => {
   try {
-    // For mobile devices, use a more reliable download method
     if (isMobileDevice()) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -104,22 +102,18 @@ const triggerMobileDownload = (blob: Blob, filename: string): void => {
       a.download = filename;
       a.style.display = 'none';
 
-      // Add to DOM, click, and remove
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
-      // Clean up the URL object after a delay
       setTimeout(() => {
         URL.revokeObjectURL(url);
       }, 1000);
     } else {
-      // For desktop, use saveAs
       saveAs(blob, filename);
     }
   } catch (error) {
     console.error('Download failed:', error);
-    // Fallback: try to open in new window
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
     setTimeout(() => {
@@ -130,7 +124,7 @@ const triggerMobileDownload = (blob: Blob, filename: string): void => {
 
 // Helper function to check if content fits on current page
 function checkPageSpace(state: PageState, requiredHeight: number, PDF_CONFIG: any): boolean {
-  const maxY = PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom; // Corrected calculation
+  const maxY = PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom;
   return (state.currentY + requiredHeight) <= maxY;
 }
 
@@ -140,15 +134,14 @@ function addNewPage(state: PageState, PDF_CONFIG: any): void {
   state.currentPage++;
   state.currentY = PDF_CONFIG.margins.top;
 
-  // Add page number
   const pageText = `Page ${state.currentPage}`;
   state.doc.setFont(PDF_CONFIG.fontFamily, 'normal');
   state.doc.setFontSize(9);
-  state.doc.setTextColor(128, 128, 128); // Gray
+  state.doc.setTextColor(128, 128, 128);
 
   const pageWidth = state.doc.internal.pageSize.getWidth();
   const textWidth = state.doc.getTextWidth(pageText);
-  state.doc.text(pageText, pageWidth - PDF_CONFIG.margins.right - textWidth, PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom / 2); // Adjusted Y for page number
+  state.doc.text(pageText, pageWidth - PDF_CONFIG.margins.right - textWidth, PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom / 2);
 }
 
 // Draw text with automatic wrapping and return height used
@@ -177,17 +170,14 @@ function drawText(
   state.doc.setFontSize(fontSize);
   state.doc.setTextColor(color[0], color[1], color[2]);
 
-  // Split text to fit width
   const lines = state.doc.splitTextToSize(text, maxWidth);
-  const lineHeight = fontSize * PDF_CONFIG.spacing.lineHeight * 0.352778; // Convert pt to mm
+  const lineHeight = fontSize * PDF_CONFIG.spacing.lineHeight * 0.352778;
   const totalHeight = lines.length * lineHeight;
 
-  // Check if we need a new page
   if (!checkPageSpace(state, totalHeight, PDF_CONFIG)) {
     addNewPage(state, PDF_CONFIG);
   }
 
-  // Calculate x position based on alignment
   let textX = x;
   if (align === 'center') {
     textX = PDF_CONFIG.margins.left + (PDF_CONFIG.contentWidth / 2);
@@ -195,10 +185,8 @@ function drawText(
     textX = PDF_CONFIG.margins.left + PDF_CONFIG.contentWidth;
   }
 
-  // Draw each line
   lines.forEach((line: string, index: number) => {
     const yPos = state.currentY + (index * lineHeight);
-
     if (align === 'center') {
       const lineWidth = state.doc.getTextWidth(line);
       state.doc.text(line, textX - (lineWidth / 2), yPos);
@@ -267,7 +255,6 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
 // Draw work experience section
 function drawWorkExperience(state: PageState, workExperience: any[], userType: UserType = 'experienced', PDF_CONFIG: any): number {
   if (!workExperience || workExperience.length === 0) return 0;
-
   const sectionTitle = userType === 'fresher' ? 'WORK EXPERIENCE' : 'EXPERIENCE';
   let totalHeight = drawSectionTitle(state, sectionTitle, PDF_CONFIG);
 
@@ -280,7 +267,6 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
 
     const initialYForJob = state.currentY;
     const combinedTitle = `${job.role} | ${job.company}${isValidField(job.location) ? `, ${job.location}` : ''}`;
-
     const yearText = job.year;
     state.doc.setFont(PDF_CONFIG.fontFamily, 'bold');
     state.doc.setFontSize(PDF_CONFIG.fonts.year.size);
@@ -289,18 +275,17 @@ function drawWorkExperience(state: PageState, workExperience: any[], userType: U
     const yearY = initialYForJob + (PDF_CONFIG.fonts.jobTitle.size * 0.352778 * 0.5);
     state.doc.text(yearText, yearX, yearY);
     state.doc.setFont(PDF_CONFIG.fontFamily, 'normal');
-
     drawText(state, combinedTitle, PDF_CONFIG.margins.left, PDF_CONFIG, {
       fontSize: PDF_CONFIG.fonts.jobTitle.size,
       fontWeight: 'normal',
       maxWidth: PDF_CONFIG.contentWidth - yearWidth - 5
     });
-
     state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
 
-    if (job.bullets && job.bullets.length > 0) {
+    const validBullets = job.bullets ? job.bullets.filter(b => isValidField(b)) : [];
+    if (validBullets.length > 0) {
       state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
-      job.bullets.forEach((bullet: string) => {
+      validBullets.forEach((bullet: string) => {
         const bulletText = `• ${bullet}`;
         const bulletHeight = drawText(state, bulletText, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
           fontSize: PDF_CONFIG.fonts.body.size,
@@ -348,8 +333,9 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
         color: PDF_CONFIG.colors.secondary
       });
     }
-    if (edu.relevantCoursework && edu.relevantCoursework.length > 0) {
-      const courseworkText = `Relevant Coursework: ${edu.relevantCoursework.join(', ')}`;
+    const validCourses = edu.relevantCoursework ? edu.relevantCoursework.filter(c => isValidField(c)) : [];
+    if (validCourses.length > 0) {
+      const courseworkText = `Relevant Coursework: ${validCourses.join(', ')}`;
       const courseworkHeight = drawText(state, courseworkText, PDF_CONFIG.margins.left, PDF_CONFIG, {
         fontSize: PDF_CONFIG.fonts.body.size,
         fontWeight: PDF_CONFIG.fonts.body.weight,
@@ -380,25 +366,23 @@ function drawEducation(state: PageState, education: any[], PDF_CONFIG: any): num
 // Draw projects section
 function drawProjects(state: PageState, projects: any[], PDF_CONFIG: any): number {
   if (!projects || projects.length === 0) return 0;
-
-  const githubProjects = projects.filter(project => project.githubUrl);
   let totalHeight = drawSectionTitle(state, 'PROJECTS', PDF_CONFIG);
 
   projects.forEach((project, index) => {
     if (!checkPageSpace(state, 25, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
     }
-
     const titleHeight = drawText(state, project.title, PDF_CONFIG.margins.left, PDF_CONFIG, {
       fontSize: PDF_CONFIG.fonts.jobTitle.size,
       fontWeight: PDF_CONFIG.fonts.jobTitle.weight
     });
     totalHeight += titleHeight;
     state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
-
-    if (project.bullets && project.bullets.length > 0) {
+    
+    const validBullets = project.bullets ? project.bullets.filter(b => isValidField(b)) : [];
+    if (validBullets.length > 0) {
       state.currentY += PDF_CONFIG.spacing.bulletListSpacing;
-      project.bullets.forEach((bullet: string) => {
+      validBullets.forEach((bullet: string) => {
         const bulletText = `• ${bullet}`;
         const bulletHeight = drawText(state, bulletText, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent, PDF_CONFIG, {
           fontSize: PDF_CONFIG.fonts.body.size,
@@ -421,19 +405,21 @@ function drawProjects(state: PageState, projects: any[], PDF_CONFIG: any): numbe
 
 // Draw skills section
 function drawSkills(state: PageState, skills: any[], PDF_CONFIG: any): number {
-  if (!skills || skills.length === 0) return 0;
-
+  const validSkills = skills ? skills.filter(skill => isValidField(skill.category) && skill.list && skill.list.filter(item => isValidField(item)).length > 0) : [];
+  if (validSkills.length === 0) return 0;
+  
   let totalHeight = drawSectionTitle(state, 'SKILLS', PDF_CONFIG);
   const estimatedSkillLineHeight = PDF_CONFIG.fonts.body.size * PDF_CONFIG.spacing.lineHeight * 0.352778;
 
-  skills.forEach((skill, index) => {
+  validSkills.forEach((skill, index) => {
     if (!checkPageSpace(state, 15, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
     }
 
     const x = PDF_CONFIG.margins.left;
     const categoryText = `${skill.category}: `;
-    const listText = skill.list ? skill.list.join(', ') : '';
+    const validList = skill.list.filter(item => isValidField(item));
+    const listText = validList.join(', ');
 
     state.doc.setFont(PDF_CONFIG.fontFamily, 'bold');
     state.doc.setFontSize(PDF_CONFIG.fonts.body.size);
@@ -457,7 +443,7 @@ function drawSkills(state: PageState, skills: any[], PDF_CONFIG: any): number {
     state.currentY += lines.length * estimatedSkillLineHeight;
     totalHeight += lines.length * estimatedSkillLineHeight;
 
-    if (index < skills.length - 1) {
+    if (index < validSkills.length - 1) {
       state.currentY += 1;
       totalHeight += 1;
     }
@@ -469,11 +455,17 @@ function drawSkills(state: PageState, skills: any[], PDF_CONFIG: any): number {
 
 // Draw certifications section
 function drawCertifications(state: PageState, certifications: (string | Certification)[], PDF_CONFIG: any): number {
-  if (!certifications || certifications.length === 0) return 0;
+  const validCerts = certifications ? certifications.filter(cert => {
+    if (typeof cert === 'string') return isValidField(cert);
+    if (typeof cert === 'object' && cert !== null) return isValidField(cert.title);
+    return false;
+  }) : [];
+
+  if (validCerts.length === 0) return 0;
 
   let totalHeight = drawSectionTitle(state, 'CERTIFICATIONS', PDF_CONFIG);
 
-  certifications.forEach((cert) => {
+  validCerts.forEach((cert) => {
     if (!checkPageSpace(state, 10, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
     }
@@ -486,7 +478,7 @@ function drawCertifications(state: PageState, certifications: (string | Certific
       });
       totalHeight += titleHeight;
 
-      if (cert.description) {
+      if (isValidField(cert.description)) {
         state.currentY += 1; // Small gap
         const descHeight = drawText(state, cert.description, PDF_CONFIG.margins.left + PDF_CONFIG.spacing.bulletIndent * 2, PDF_CONFIG, {
           maxWidth: PDF_CONFIG.contentWidth - (PDF_CONFIG.spacing.bulletIndent * 2)
@@ -509,8 +501,7 @@ function drawCertifications(state: PageState, certifications: (string | Certific
 
 // Draw professional summary section
 function drawProfessionalSummary(state: PageState, summary: string, PDF_CONFIG: any): number {
-  if (!summary) return 0;
-
+  if (!isValidField(summary)) return 0;
   let totalHeight = drawSectionTitle(state, 'PROFESSIONAL SUMMARY', PDF_CONFIG);
   const summaryHeight = drawText(state, summary, PDF_CONFIG.margins.left, PDF_CONFIG, {
     fontSize: PDF_CONFIG.fonts.body.size,
@@ -524,7 +515,7 @@ function drawProfessionalSummary(state: PageState, summary: string, PDF_CONFIG: 
 
 // Draw career objective section for students
 function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: any): number {
-  if (!objective) return 0;
+  if (!isValidField(objective)) return 0;
   let totalHeight = drawSectionTitle(state, 'CAREER OBJECTIVE', PDF_CONFIG);
   state.currentY += 3;
   const objectiveHeight = drawText(state, objective, PDF_CONFIG.margins.left, PDF_CONFIG, {
@@ -537,14 +528,13 @@ function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: an
   return totalHeight;
 }
 
-// MODIFIED: Simplified to only draw achievements
+// MODIFIED: Simplified to only draw achievements, with filtering
 function drawAchievementsAndExtras(state: PageState, resumeData: ResumeData, PDF_CONFIG: any): number {
-  const hasAchievements = resumeData.achievements && resumeData.achievements.length > 0;
-  if (!hasAchievements) return 0;
+  const validAchievements = resumeData.achievements ? resumeData.achievements.filter(a => isValidField(a)) : [];
+  if (validAchievements.length === 0) return 0;
 
   let totalHeight = drawSectionTitle(state, 'ACHIEVEMENTS', PDF_CONFIG);
-
-  resumeData.achievements.forEach(item => {
+  validAchievements.forEach(item => {
     if (!checkPageSpace(state, 10, PDF_CONFIG)) {
       addNewPage(state, PDF_CONFIG);
     }
@@ -554,7 +544,6 @@ function drawAchievementsAndExtras(state: PageState, resumeData: ResumeData, PDF
     });
     totalHeight += itemHeight;
   });
-
   state.currentY += 2;
   return totalHeight;
 }
@@ -563,7 +552,6 @@ function drawAchievementsAndExtras(state: PageState, resumeData: ResumeData, PDF
 // Main export function with mobile optimization
 export const exportToPDF = async (resumeData: ResumeData, userType: UserType = 'experienced', options: ExportOptions = defaultExportOptions): Promise<void> => {
   const PDF_CONFIG = createPDFConfig(options);
-
   try {
     if (isMobileDevice()) {
       console.log('Starting PDF generation for mobile device...');
@@ -590,11 +578,11 @@ export const exportToPDF = async (resumeData: ResumeData, userType: UserType = '
     
     state.currentY += 3;
 
-    if (resumeData.summary && resumeData.summary.trim() !== '') {
-      drawProfessionalSummary(state, resumeData.summary, PDF_CONFIG);
+    if (isValidField(resumeData.summary)) {
+      drawProfessionalSummary(state, resumeData.summary!, PDF_CONFIG);
     }
-    if (userType === 'student' && resumeData.careerObjective && resumeData.careerObjective.trim() !== '') {
-      drawCareerObjective(state, resumeData.careerObjective, PDF_CONFIG);
+    if (userType === 'student' && isValidField(resumeData.careerObjective)) {
+      drawCareerObjective(state, resumeData.careerObjective!, PDF_CONFIG);
     }
 
     if (userType === 'experienced') {
@@ -708,6 +696,7 @@ const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experie
     <p style="margin-bottom: 12pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt;">${data.summary}</p>
   </div>
 ` : '';
+
 
   const educationHtml = data.education && data.education.length > 0 ? `
     <div style="margin-top: 5pt;">
