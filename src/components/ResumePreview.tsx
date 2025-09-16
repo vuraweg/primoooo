@@ -528,8 +528,14 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
 
                 return (
                   // MODIFIED: Use listItemStyle
-                  <li key={index} style={{ 
-                    ...listItemStyle, // Apply common list item style
+                  <li key={index} style={{
+                    ...listItemStyle,
+                    '::before': {
+                      content: '"•"',
+                      position: 'absolute',
+                      left: '0',
+                      color: 'inherit'
+                    },
                     ...(isSidebarTemplate && {
                       padding: '4px 0',
                       borderBottom: '1px solid #e5e7eb'
@@ -590,15 +596,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
                 <ul style={{ marginLeft: exportOptions ? `${mmToPx(exportOptions.entrySpacing * 3)}px` : '22.68px', listStyleType: 'none' }}>
                   {resumeData.languagesKnown!.map((item, index) => (
                     // MODIFIED: Use listItemStyle
-                    <li key={index} style={{
-                      ...listItemStyle,
-                      '::before': {
-                        content: '"•"',
-                        position: 'absolute',
-                        left: '0',
-                        color: 'inherit'
-                      }
-                    }}>{item}</li>
+                    <li key={index} style={listItemStyle}>{item}</li>
                   ))}
                 </ul>
               </div>

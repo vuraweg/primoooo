@@ -510,6 +510,16 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
   const handleExportFile = useCallback(async (options: ExportOptions, format: 'pdf' | 'word') => {
     if (!optimizedResume) return;
     
+    // ADDED: Debug logging for export data
+    console.log('[ResumeOptimizer] handleExportFile - optimizedResume data being exported:', optimizedResume);
+    console.log('[ResumeOptimizer] Contact details in export data:');
+    console.log('  - name:', optimizedResume.name);
+    console.log('  - phone:', optimizedResume.phone);
+    console.log('  - email:', optimizedResume.email);
+    console.log('  - linkedin:', optimizedResume.linkedin);
+    console.log('  - github:', optimizedResume.github);
+    console.log('  - location:', optimizedResume.location);
+    
     if (format === 'pdf') {
       if (isExportingPDF || isExportingWord) return;
       setIsExportingPDF(true);
