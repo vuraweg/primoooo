@@ -262,8 +262,9 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
     fieldValue?: string | null,
     fieldType: 'phone' | 'email' | 'url' | 'text' = 'text'
   ) => {
-    if (!fieldValue) return;
-    const parts = fieldValue.split(/[,|]/).map((p) => p.trim());
+    const safeFieldValue = toSafeText(fieldValue);
+    if (!safeFieldValue) return;
+    const parts = safeFieldValue.split(/[,|]/).map((p) => p.trim());
     const valids = parts.filter((p) => isValidField(p, fieldType));
     if (valids.length > 0) contactParts.push(valids.join(' | '));
   };
@@ -823,8 +824,9 @@ const generateWordHTMLContent = (
     fieldType: 'phone' | 'email' | 'url' | 'text' = 'text',
     linkType?: 'tel' | 'mailto' | 'http'
   ) => {
-    if (!fieldValue) return;
-    const parts = fieldValue.split(/[,|]/).map((p) => p.trim());
+    const safeFieldValue = toSafeText(fieldValue);
+    if (!safeFieldValue) return;
+    const parts = safeFieldValue.split(/[,|]/).map((p) => p.trim());
     const validParts = parts.filter((p) => isValidField(p, fieldType));
     if (validParts.length > 0) {
       const content = validParts
