@@ -50,7 +50,7 @@ export const ResumeExportSettings: React.FC<ResumeExportSettingsProps> = ({
     }
   };
 
-  const fontFamilies = ['Calibri', 'Times New Roman', 'Arial', 'Verdana', 'Georgia'];
+  const fontFamilies = [ 'Times New Roman', 'Arial', 'Verdana', 'Georgia','Calibri'];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
