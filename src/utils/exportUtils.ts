@@ -694,7 +694,7 @@ function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: an
     maxWidth: PDF_CONFIG.contentWidth,
   });
   totalHeight += objectiveHeight;
-  state.currentY += 1.5;
+  state.currentY += 1;
   return totalHeight;
 }
 
