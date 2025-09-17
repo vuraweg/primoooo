@@ -838,12 +838,17 @@ export const getFileName = (
   resumeData: ResumeData,
   fileExtension: 'pdf' | 'doc'
 ): string => {
-  const namePart = toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
+  const namePart =
+    toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
+
   const rolePart = resumeData.targetRole
     ? `_${toSafeText(resumeData.targetRole).replace(/\s+/g, '_')}`
     : '';
-  return `${namePart}${rolePart}_Resume.${fileExtension}`;
+
+  // Final: name_role.pdf
+  return `${namePart}${rolePart}.${fileExtension}`;
 };
+
 
 // ---------- Word Export ----------
 export const exportToWord = async (
