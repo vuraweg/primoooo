@@ -176,7 +176,7 @@ Respond ONLY with valid JSON in this exact structure:
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: 'POST',
         headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
           "HTTP-Referer": "https://primoboost.ai",
           "X-Title": "PrimoBoost AI"
@@ -324,7 +324,7 @@ Respond ONLY with valid JSON in this exact structure:
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: 'POST',
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         "HTTP-Referer": "https://primoboost.ai",
         "X-Title": "PrimoBoost AI"
@@ -433,7 +433,7 @@ ANALYSIS REQUIREMENTS:
 - Identify specific actionable recommendations for overall improvement in the 'recommendations' array, especially for scores below 70% in any *individual category* (not just totalScore). These recommendations should be concrete and directly related to the issues found.
 - Assign a letter grade (A+ 95-100, A 90-94, B+ 85-89, B 80-84, C+ 75-79, C 70-74, D 60-69, F <60).
 
--section order summary education and work experience and  project and skill certifications any not this flow -10 points per section unders and miss section -20 if any section miss 
+-section order summary education and work experience and  project and skill certifications any not this flow -10 points per section unders and miss section -20 if any section miss 
 
 Respond ONLY with valid JSON in this exact structure:
 
@@ -534,7 +534,7 @@ Respond ONLY with valid JSON in this exact structure:
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: 'POST',
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         "HTTP-Referer": "https://primoboost.ai",
         "X-Title": "PrimoBoost AI"
@@ -701,4 +701,3 @@ export const generateAfterScore = async (
     improvementAreas,
   };
 };
-
