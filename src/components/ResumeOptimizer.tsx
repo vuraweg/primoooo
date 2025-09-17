@@ -333,6 +333,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
       try {
         // ⬇️ NEW LOGIC: prefer already-parsed + complete data; skip re-parsing if possible
         let baseResume: ResumeData;
+        let processedResumeText = cleanResumeText(extractionResult.text); // Add this line to clean the text
 
         if (parsedResumeData && checkForMissingSections(parsedResumeData).length === 0) {
           // Already have a complete parsed resume (perhaps after user filled missing sections)
