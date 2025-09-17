@@ -303,7 +303,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         parsedResult = deepClean(parsedResult);
 
         // Ensure skills have proper count values
-        if (parsedResult.skills && Array.isArray(parsedResult.skills)) {
+        if (parsedResult.skills && Array.isArray(parsedResult.skills)) { // Line 303
           parsedResult.skills = parsedResult.skills.map((skill: any) => ({
             ...skill,
             count: skill.list ? skill.list.length : 0
@@ -311,10 +311,10 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         }
 
         // ⬇️ CHANGED: Keep certifications as objects { title, description }
-        if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
+        if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) { // Line 310
           parsedResult.certifications = parsedResult.certifications
             .map((cert: any) => {
-              if (typeof cert === 'string') {
+              if (typeof cert === 'string') { // Line 312
                 return { title: cert.trim(), description: '' };
               }
               if (cert && typeof cert === 'object') {
@@ -339,29 +339,29 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         }
 
         // Ensure work experience is properly formatted
-        if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) {
+        if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) { // Line 340
           parsedResult.workExperience = parsedResult.workExperience.filter((work: any) =>
             work && work.role && work.company && work.year
           );
         }
 
         // Ensure projects are properly formatted
-        if (parsedResult.projects && Array.isArray(parsedResult.projects)) {
+        if (parsedResult.projects && Array.isArray(parsedResult.projects)) { // Line 346
           parsedResult.projects = parsedResult.projects.filter((project: any) =>
             project && project.title && project.bullets && project.bullets.length > 0
           );
         }
 
         // Prioritize user profile data first
-        parsedResult.name = userName || parsedResult.name || "";
+        parsedResult.name = userName || parsedResult.name || ""; // Line 352
         
         // FIXED: Prioritize user profile data for social links
-        parsedResult.linkedin = userLinkedin || linkedinUrl || parsedResult.linkedin || "";
-        parsedResult.github = userGithub || githubUrl || parsedResult.github || "";
+        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || ""; // Prioritize userLinkedin // Line 355
+        parsedResult.github = userGithub || parsedResult.github || "";     // Prioritize userGithub // Line 356
 
         // Targeted cleaning and fallback for email
         if (userEmail) {
-          parsedResult.email = userEmail; // Prioritize user provided email
+          parsedResult.email = userEmail; // Prioritize user provided email // Line 360
         } else if (parsedResult.email) {
           const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
           const match = parsedResult.email.match(emailRegex);
@@ -372,13 +372,13 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
 
         // Targeted cleaning and fallback for phone
         if (userPhone) {
-          parsedResult.phone = userPhone; // Prioritize user provided phone
+          parsedResult.phone = userPhone; // Prioritize user provided phone // Line 370
         } else if (parsedResult.phone) {
           // This regex tries to capture common phone number patterns including international codes, parentheses, spaces, and hyphens.
           // It's designed to be robust but might need adjustments for very unusual formats.
           const phoneRegex = /(\+?\d{1,3}[-.\s]?)(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
           const match = String(parsedResult.phone).match(phoneRegex); // Ensure parsedResult.phone is a string
-          parsedResult.phone = match && match[0] ? match[0] : ""; // FIXED: Extract the full matched phone number string
+          parsedResult.phone = match && match[0] ? match[0] : ""; // FIXED: Extract the full matched phone number string // Line 376
         } else {
           parsedResult.phone = ""; // Ensure it's an empty string if nothing is found
         }
