@@ -565,9 +565,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
         message: `${format.toUpperCase()} export failed. Please try again.`
       });
       
-      setTimeout(() => {
-        setExportStatus({ type: null, status: null, message: '' });
-      }, 5000);
+      setTimeout(() => { setExportStatus({ type: null, status: null, message: '' }); }, 5000);
     } finally {
       if (format === 'pdf') {
         setIsExportingPDF(false);
