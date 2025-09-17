@@ -834,7 +834,30 @@ export const exportToPDF = async (
 };
 
 // ---------- Filename Helper ----------
-export const getFileName
+// src/utils/exportUtils.ts
+// ...
+export const getFileName = (
+  resumeData: ResumeData,
+  fileExtension: 'pdf' | 'doc'
+): string => {
+  const namePart =
+     toSafeText(resumeData.name).replace(/\s+/g, '') || 'Resume'; // Changed to remove all spaces
+
+
+   let rolePart = '';
+  if (resumeData.targetRole) {
+    rolePart = toSafeText(resumeData.targetRole).replace(/\s+/g, ''); // Changed to remove all spaces
+  }
+
+  // Final: firstname_lastname_associatesystemengineering.pdf
+ if (rolePart) {
+    return `${namePart}${rolePart}.${fileExtension}`; // Concatenate directly
+  } else {
+    return `${namePart}.${fileExtension}`;
+  }
+};
+// ...
+
 
 // ---------- Word Export ----------
 export const exportToWord = async (
