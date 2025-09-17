@@ -34,8 +34,8 @@ const toSafeText = (v?: unknown): string => (typeof v === 'string' ? v : '');
 // ---------- Config ----------
 const createPDFConfig = (options: ExportOptions) => {
   const layoutConfig = options.layoutType === 'compact' ? 
-    { margins: { top: 8, bottom: 8, left: 12, right: 12 } } :
-    { margins: { top: 10, bottom: 10, left: 15, right: 15 } };
+    { margins: { top: 10, bottom: 10, left: 15, right: 15 } } : // Adjusted compact margins
+    { margins: { top: 15, bottom: 15, left: 20, right: 20 } }; // Adjusted standard margins
   
   const paperConfig = options.paperSize === 'letter' ?
     { pageWidth: 216, pageHeight: 279 } :
@@ -290,10 +290,10 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
   console.log('  - linkedin:', resumeData.linkedin);
   console.log('  - github:', resumeData.github);
   
-  const contactParts: string[] = [];
+  const contactParts: { value: string; type: 'phone' | 'email' | 'url' | 'text' }[] = [];
 
   const add = (
-    fieldValue?: string | null,
+    fieldValue: string | null | undefined,
     fieldType: 'phone' | 'email' | 'url' | 'text' = 'text'
   ) => {
     console.log(`[drawContactInfo] Adding field: "${fieldValue}" | type: ${fieldType}`);
@@ -305,11 +305,11 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
       processedValue = `https://${safeFieldValue}`; // Prepend https if missing
     }
     
-    if (isValidField(processedValue, fieldType)) {
-      contactParts.push(processedValue);
-       console.log(`[drawContactInfo] Successfully added: "${processedValue}"`);
-     } else {
-       console.log(`[drawContactInfo] Field rejected by validation: "${processedValue}"`);
+    if (isValidField(processedValue, fieldType)) { // Line 163
+      contactParts.push({ value: processedValue, type: fieldType });
+      console.log(`[drawContactInfo] Successfully added: "${processedValue}"`);
+    } else {
+      console.log(`[drawContactInfo] Field rejected by validation: "${processedValue}"`);
     }
   };
 
@@ -322,7 +322,7 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
   if (contactParts.length === 0) return 0;
   const contactText = contactParts.join(' | ');
   console.log('[drawContactInfo] Final contact text:', contactText);
-
+  
   const height = drawText(state, contactText, PDF_CONFIG.margins.left, PDF_CONFIG, {
     fontSize: PDF_CONFIG.fonts.contact.size,
     fontWeight: PDF_CONFIG.fonts.contact.weight,
@@ -478,7 +478,7 @@ function drawEducation(state: PageState, education: any[] = [], PDF_CONFIG: any)
       totalHeight += courseworkHeight;
     }
 
-    safeSetFont(state.doc, PDF_CONFIG.fontFamily, 'bold');
+    safeSetFont(state.doc, PDF_CONFIG.fontFamily, 'bold'); // Line 272
     state.doc.setFontSize(PDF_CONFIG.fonts.year.size);
     state.doc.setTextColor(
       PDF_CONFIG.colors.primary[0],
@@ -561,7 +561,7 @@ function drawSkills(state: PageState, skills: any[] = [], PDF_CONFIG: any): numb
   let totalHeight = drawSectionTitle(state, 'SKILLS', PDF_CONFIG);
   const estLine = PDF_CONFIG.fonts.body.size * PDF_CONFIG.spacing.lineHeight * PT_TO_MM;
 
-  validSkills.forEach((skill, i) => {
+  validSkills.forEach((skill, i) => { // Line 343
     if (!checkPageSpace(state, 15, PDF_CONFIG)) addNewPage(state, PDF_CONFIG);
 
     const x = PDF_CONFIG.margins.left;
@@ -575,7 +575,7 @@ function drawSkills(state: PageState, skills: any[] = [], PDF_CONFIG: any): numb
       PDF_CONFIG.colors.primary[0],
       PDF_CONFIG.colors.primary[1],
       PDF_CONFIG.colors.primary[2]
-    );
+    ); // Line 354
 
     const categoryWidth = safeGetTextWidth(state.doc, categoryText);
     state.doc.text(categoryText, x, state.currentY);
@@ -621,7 +621,7 @@ function drawCertifications(
 
   let totalHeight = drawSectionTitle(state, 'CERTIFICATIONS', PDF_CONFIG);
 
-  validCerts.forEach((cert) => {
+  validCerts.forEach((cert) => { // Line 400
     if (!checkPageSpace(state, 10, PDF_CONFIG)) addNewPage(state, PDF_CONFIG);
 
     if (typeof cert === 'object' && cert !== null && (cert as any).title) {
@@ -761,7 +761,7 @@ export const exportToPDF = async (
     state.currentY += PDF_CONFIG.spacing.afterName;
 
     drawContactInfo(state, resumeData, PDF_CONFIG);
-    state.currentY += 3;
+    state.currentY += PDF_CONFIG.spacing.afterContact; // Use configured spacing
 
     // Summary / Objective
     if ((userType === 'fresher' || userType === 'student') && isValidField(resumeData.careerObjective)) {
@@ -798,7 +798,7 @@ export const exportToPDF = async (
     const totalPages = state.currentPage;
     if (totalPages > 1) {
       for (let i = 1; i <= totalPages; i++) {
-        if (i > 1) doc.setPage(i);
+        if (i > 1) doc.setPage(i); // Line 512
         const pageText = `Page ${i} of ${totalPages}`;
         safeSetFont(doc, PDF_CONFIG.fontFamily, 'normal');
         doc.setFontSize(9);
