@@ -320,7 +320,7 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
   add(resumeData.github, 'url');
 
   if (contactParts.length === 0) return 0;
-  const contactText = contactParts.join(' | ');
+  const contactText = contactParts.map(part => part.value).join(' | ');
   console.log('[drawContactInfo] Final contact text:', contactText);
   
   const height = drawText(state, contactText, PDF_CONFIG.margins.left, PDF_CONFIG, {
@@ -680,14 +680,14 @@ function drawProfessionalSummary(state: PageState, summary: string, PDF_CONFIG: 
     maxWidth: PDF_CONFIG.contentWidth,
   });
   totalHeight += summaryHeight;
-  state.currentY += 3;
+  state.currentY += 2;
   return totalHeight;
 }
 
 function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: any): number {
   if (!isValidField(objective)) return 0;
   let totalHeight = drawSectionTitle(state, 'CAREER OBJECTIVE', PDF_CONFIG);
-  state.currentY += 3;
+  state.currentY += 1;
   const objectiveHeight = drawText(state, objective, PDF_CONFIG.margins.left, PDF_CONFIG, {
     fontSize: PDF_CONFIG.fonts.body.size,
     fontWeight: PDF_CONFIG.fonts.body.weight,
@@ -838,12 +838,17 @@ export const getFileName = (
   resumeData: ResumeData,
   fileExtension: 'pdf' | 'doc'
 ): string => {
-  const namePart = toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
+  const namePart =
+    toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
+
   const rolePart = resumeData.targetRole
     ? `_${toSafeText(resumeData.targetRole).replace(/\s+/g, '_')}`
     : '';
-  return `${namePart}${rolePart}_Resume.${fileExtension}`;
+
+  // Final: name_role.pdf
+  return `${namePart}${rolePart}.${fileExtension}`;
 };
+
 
 // ---------- Word Export ----------
 export const exportToWord = async (
