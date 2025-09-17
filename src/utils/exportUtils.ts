@@ -320,7 +320,7 @@ function drawContactInfo(state: PageState, resumeData: ResumeData, PDF_CONFIG: a
   add(resumeData.github, 'url');
 
   if (contactParts.length === 0) return 0;
-  const contactText = contactParts.join(' | ');
+  const contactText = contactParts.map(part => part.value).join(' | ');
   console.log('[drawContactInfo] Final contact text:', contactText);
   
   const height = drawText(state, contactText, PDF_CONFIG.margins.left, PDF_CONFIG, {
