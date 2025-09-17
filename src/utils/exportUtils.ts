@@ -834,27 +834,7 @@ export const exportToPDF = async (
 };
 
 // ---------- Filename Helper ----------
-export const getFileName = (
-  resumeData: ResumeData,
-  fileExtension: 'pdf' | 'doc'
-): string => {
-  const namePart =
-     toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
-
-
-   let rolePart = '';
-  if (resumeData.targetRole) {
-    rolePart = toSafeText(resumeData.targetRole).replace(/\s+/g, '_');
-  }
-
-  // Final: name_role.pdf
- if (rolePart) {
-    return `${namePart}_${rolePart}.${fileExtension}`;
-  } else {
-    return `${namePart}.${fileExtension}`;
-  }
-};
-
+export const getFileName
 
 // ---------- Word Export ----------
 export const exportToWord = async (
