@@ -761,7 +761,7 @@ export const exportToPDF = async (
     state.currentY += PDF_CONFIG.spacing.afterName;
 
     drawContactInfo(state, resumeData, PDF_CONFIG);
-    state.currentY += PDF_CONFIG.spacing.afterContact; // Use configured spacing
+    state.currentY += PDF_CONFIG.spacing.entrySpacing * 0.5; // Use configured spacing
 
     // Summary / Objective
     if ((userType === 'fresher' || userType === 'student') && isValidField(resumeData.careerObjective)) {
