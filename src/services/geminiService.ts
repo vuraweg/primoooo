@@ -8,6 +8,25 @@ if (!OPENROUTER_API_KEY) {
 }
 
 const deepCleanComments = (val: any): any => {
+   let cleanedInput = input;
+   cleanedInput = cleanedInput.replace(/\/\*[\s\S]*?\*\//g, '');
+  cleanedInput = cleanedInput.replace(/\/\/\s*Line\s*\d+\s*/g, '');
+
+  const lines = cleanedInput.split(/\r?\n/).map((line) => {
+      // If the line starts with //, remove the whole line
+      if (/^\s*\/\//.test(line)) return '';
+
+      // If // appears mid-line, remove from // to end of line, but only if it's not part of a URL
+      const idx = line.indexOf('//');
+      if (idx !== -1) {
+        const before = line.slice(0, idx);
+        // Check if it's not part of a URL (e.g., "https://")
+        if (!before.includes('://')) {
+          return line.slice(0, idx).trimEnd();
+        }
+      }
+      return line;
+
   const stripLineComments = (input: string): string => {
     let out = input.replace(/\/\*[\s\S]*?\*\//g, '');
     const lines = out.split(/\r?\n/).map((line) => {
