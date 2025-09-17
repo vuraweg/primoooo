@@ -839,14 +839,20 @@ export const getFileName = (
   fileExtension: 'pdf' | 'doc'
 ): string => {
   const namePart =
-    toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
+     toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
 
-  const rolePart = resumeData.targetRole
-    ? `_${toSafeText(resumeData.targetRole).replace(/\s+/g, '_')}`
-    : '';
+
+   let rolePart = '';
+  if (resumeData.targetRole) {
+    rolePart = toSafeText(resumeData.targetRole).replace(/\s+/g, '_');
+  }
 
   // Final: name_role.pdf
-  return `${namePart}${rolePart}.${fileExtension}`;
+ if (rolePart) {
+    return `${namePart}_${rolePart}.${fileExtension}`;
+  } else {
+    return `${namePart}.${fileExtension}`;
+  }
 };
 
 
