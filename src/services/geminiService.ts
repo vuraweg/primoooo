@@ -7,6 +7,31 @@ if (!OPENROUTER_API_KEY) {
   throw new Error('OpenRouter API key is not configured. Please add VITE_OPENROUTER_API_KEY to your environment variables.');
 }
 
+const deepCleanComments = (val: any): any => {
+  const stripLineComments = (input: string): string => {
+    let out = input.replace(/\/\*[\s\S]*?\*\//g, '');
+    const lines = out.split(/\r?\n/).map((line) => {
+      if (/^\s*\/\//.test(line)) return '';
+      const idx = line.indexOf('//');
+      if (idx === -1) return line;
+      const before = line.slice(0, idx);
+      if (before.includes('://')) return line;
+      return line.slice(0, idx).trimEnd();
+    });
+    out = lines.join('\n');
+    out = out.replace(/\n{3,}/g, '\n\n');
+    return out.trim();
+  };
+  if (typeof val === 'string') return stripLineComments(val);
+  if (Array.isArray(val)) return val.map(deepCleanComments);
+  if (val && typeof val === 'object') {
+    const out: Record<string, any> = {};
+    for (const k of Object.keys(val)) out[k] = deepCleanComments(val[k]);
+    return out;
+  }
+  return val;
+};
+
 export const optimizeResume = async (
   resume: string,
   jobDescription: string,
@@ -215,106 +240,86 @@ User Type: ${userType.toUpperCase()}
 
 LinkedIn URL provided: ${linkedinUrl || 'NONE - leave empty'}
 GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
- 
-   const maxRetries = 5; // Increased from 3 to 5
-   let retryCount = 3;
-   let delay = 2000; // Increased from 1000 (1 second) to 2000 (2 seconds)
+
+  const maxRetries = 5;
+  let retryCount = 0;
+  let delay = 2000;
 
   while (retryCount < maxRetries) {
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          "HTTP-Referer": "https://primoboost.ai",
-          "X-Title": "PrimoBoost AI"
+          'HTTP-Referer': 'https://primoboost.ai',
+          'X-Title': 'PrimoBoost AI'
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            {
-              role: "user",
-              content: promptContent // Use promptContent here
-            }
-          ]
-        }),
+          model: 'google/gemini-2.5-flash',
+          messages: [{ role: 'user', content: promptContent }]
+        })
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('OpenRouter API error response:', errorText);
-
         if (response.status === 401) {
           throw new Error('Invalid API key. Please check your OpenRouter API key configuration.');
         } else if (response.status === 429 || response.status >= 500) {
-          // Retry for rate limits or server errors
-          console.warn(`Retrying due to OpenRouter API error: ${response.status}. Attempt ${retryCount + 1}/${maxRetries}. Retrying in ${delay / 1000}s...`);
           retryCount++;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2; // Exponential backoff
-          continue; // Continue to the next iteration of the while loop
+          if (retryCount >= maxRetries) throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+          await new Promise((r) => setTimeout(r, delay));
+          delay *= 2;
+          continue;
         } else {
-          // Non-retryable error
           throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
         }
       }
 
       const data = await response.json();
       let result = data?.choices?.[0]?.message?.content;
+      if (!result) throw new Error('No response content from OpenRouter API');
 
-      if (!result) {
-        throw new Error('No response content from OpenRouter API');
-      }
-
-      // Enhanced JSON extraction
       const jsonMatch = result.match(/```json\s*([\s\S]*?)\s*```/);
       let cleanedResult: string;
       if (jsonMatch && jsonMatch[1]) {
         cleanedResult = jsonMatch[1].trim();
       } else {
-        // Fallback to simpler cleaning if no ```json block is found
         cleanedResult = result.replace(/```json/g, '').replace(/```/g, '').trim();
       }
 
       try {
-        // ⬇️ CHANGED: make this mutable to allow deep cleaning reassignment
         let parsedResult = JSON.parse(cleanedResult);
 
-        // ⬇️ ADDED: Recursive cleaner to normalize placeholder values to empty strings
+        parsedResult = deepCleanComments(parsedResult);
+
         const EMPTY_TOKEN_RE = /^(?:n\/a|not\s*specified|none)$/i;
         const deepClean = (val: any): any => {
           if (typeof val === 'string') {
             const trimmed = val.trim();
             return EMPTY_TOKEN_RE.test(trimmed) ? '' : trimmed;
           }
-          if (Array.isArray(val)) {
-            return val.map(deepClean);
-          }
+          if (Array.isArray(val)) return val.map(deepClean);
           if (val && typeof val === 'object') {
             const out: Record<string, any> = {};
-            for (const k of Object.keys(val)) {
-              out[k] = deepClean(val[k]);
-            }
+            for (const k of Object.keys(val)) out[k] = deepClean(val[k]);
             return out;
           }
           return val;
         };
         parsedResult = deepClean(parsedResult);
 
-        // Ensure skills have proper count values
-        if (parsedResult.skills && Array.isArray(parsedResult.skills)) { // Line 303
+        if (parsedResult.skills && Array.isArray(parsedResult.skills)) {
           parsedResult.skills = parsedResult.skills.map((skill: any) => ({
             ...skill,
             count: skill.list ? skill.list.length : 0
           }));
         }
 
-        // ⬇️ CHANGED: Keep certifications as objects { title, description }
-        if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) { // Line 310
+        if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
           parsedResult.certifications = parsedResult.certifications
             .map((cert: any) => {
-              if (typeof cert === 'string') { // Line 312
+              if (typeof cert === 'string') {
                 return { title: cert.trim(), description: '' };
               }
               if (cert && typeof cert === 'object') {
@@ -338,77 +343,64 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
             .filter(Boolean);
         }
 
-        // Ensure work experience is properly formatted
-        if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) { // Line 340
-          parsedResult.workExperience = parsedResult.workExperience.filter((work: any) =>
-            work && work.role && work.company && work.year
+        if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) {
+          parsedResult.workExperience = parsedResult.workExperience.filter(
+            (work: any) => work && work.role && work.company && work.year
           );
         }
 
-        // Ensure projects are properly formatted
-        if (parsedResult.projects && Array.isArray(parsedResult.projects)) { // Line 346
-          parsedResult.projects = parsedResult.projects.filter((project: any) =>
-            project && project.title && project.bullets && project.bullets.length > 0
+        if (parsedResult.projects && Array.isArray(parsedResult.projects)) {
+          parsedResult.projects = parsedResult.projects.filter(
+            (project: any) => project && project.title && project.bullets && project.bullets.length > 0
           );
         }
 
-        // Prioritize user profile data first
-        parsedResult.name = userName || parsedResult.name || "";
-        
-        // FIXED: Prioritize user profile data for social links
-        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || ""; // Prioritize userLinkedin
-        parsedResult.github = userGithub || parsedResult.github || "";     // Prioritize userGithub
+        parsedResult.name = userName || parsedResult.name || '';
 
-        // Targeted cleaning and fallback for email
+        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || '';
+        parsedResult.github = userGithub || parsedResult.github || '';
+
         if (userEmail) {
-          parsedResult.email = userEmail; // Prioritize user provided email // Line 360
+          parsedResult.email = userEmail;
         } else if (parsedResult.email) {
           const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
-          const match = parsedResult.email.match(emailRegex);
-          parsedResult.email = match && match[0] ? match[0] : ""; // Extract valid email or set empty
+          const match = String(parsedResult.email).match(emailRegex);
+          parsedResult.email = match && match[0] ? match[0] : '';
         } else {
-          parsedResult.email = ""; // Ensure it's an empty string if nothing is found
+          parsedResult.email = '';
         }
 
-        // Targeted cleaning and fallback for phone
-        if (userPhone) { // Prioritize user provided phone
-          parsedResult.phone = userPhone; // Prioritize user provided phone // Line 370
+        if (userPhone) {
+          parsedResult.phone = userPhone;
         } else if (parsedResult.phone) {
-          // This regex tries to capture common phone number patterns including international codes, parentheses, spaces, and hyphens.
-          // It's designed to be robust but might need adjustments for very unusual formats.
           const phoneRegex = /(\+?\d{1,3}[-.\s]?)(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
-          const match = String(parsedResult.phone).match(phoneRegex); // Ensure parsedResult.phone is a string
-          parsedResult.phone = match && match[0] ? match[0] : ""; // FIXED: Extract the full matched phone number string // Line 376
+          const match = String(parsedResult.phone).match(phoneRegex);
+          parsedResult.phone = match && match[0] ? match[0] : '';
         } else {
-          parsedResult.phone = ""; // Ensure it's an empty string if nothing is found
+          parsedResult.phone = '';
         }
 
-        // Set the origin for JD-optimized resumes
-        parsedResult.origin = 'jd_optimized'; // ADDED LINE
+        parsedResult.origin = 'jd_optimized';
 
         return parsedResult;
       } catch (parseError) {
         console.error('JSON parsing error:', parseError);
-        console.error('Raw response attempted to parse:', cleanedResult); // Log the string that failed to parse
+        console.error('Raw response attempted to parse:', cleanedResult);
         throw new Error('Invalid JSON response from OpenRouter API');
       }
-    } catch (error) {
-      console.error('Error calling OpenRouter API:', error);
-
-      // Re-throw with more specific error message if it's already a known error
-      if (error instanceof Error && (
-          error.message.includes('API key') ||
+    } catch (error: any) {
+      if (
+        error instanceof Error &&
+        (error.message.includes('API key') ||
           error.message.includes('Rate limit') ||
           error.message.includes('service is temporarily unavailable') ||
-          error.message.includes('Invalid JSON response')
-      )) {
+          error.message.includes('Invalid JSON response'))
+      ) {
         throw error;
       }
-
-      // Generic error for network issues or other unknown errors
       throw new Error('Failed to connect to OpenRouter API. Please check your internet connection and try again.');
     }
   }
-  // If the loop finishes, it means all retries failed
+
   throw new Error(`Failed to optimize resume after ${maxRetries} attempts.`);
 };
