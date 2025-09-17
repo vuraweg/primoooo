@@ -7,6 +7,31 @@ if (!OPENROUTER_API_KEY) {
   throw new Error('OpenRouter API key is not configured. Please add VITE_OPENROUTER_API_KEY to your environment variables.');
 }
 
+const deepCleanComments = (val: any): any => {
+  const stripLineComments = (input: string): string => {
+    let out = input.replace(/\/\*[\s\S]*?\*\//g, '');
+    const lines = out.split(/\r?\n/).map((line) => {
+      if (/^\s*\/\//.test(line)) return '';
+      const idx = line.indexOf('//');
+      if (idx === -1) return line;
+      const before = line.slice(0, idx);
+      if (before.includes('://')) return line;
+      return line.slice(0, idx).trimEnd();
+    });
+    out = lines.join('\n');
+    out = out.replace(/\n{3,}/g, '\n\n');
+    return out.trim();
+  };
+  if (typeof val === 'string') return stripLineComments(val);
+  if (Array.isArray(val)) return val.map(deepCleanComments);
+  if (val && typeof val === 'object') {
+    const out: Record<string, any> = {};
+    for (const k of Object.keys(val)) out[k] = deepCleanComments(val[k]);
+    return out;
+  }
+  return val;
+};
+
 export const optimizeResume = async (
   resume: string,
   jobDescription: string,
@@ -66,7 +91,7 @@ SECTION ORDER FOR COLLEGE STUDENTS:
       return `You are a professional resume optimization assistant for FRESHERS/NEW GRADUATES. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
 
 FRESHER REQUIREMENTS:
-1. Professional Summary is OPTIONAL - only include if the candidate has relevant internships or strong projects
+1. MUST include a compelling Career Objective (2 lines MAX, ATS-readable, focusing on entry-level goals, relevant skills, and aspirations)
 2. PRIORITIZE Education, Academic Projects, and Internships
 3. Include additional sections that showcase potential: Achievements, Extra-curricular Activities, Languages
 4. Focus on academic projects, internships, and transferable skills
@@ -76,7 +101,7 @@ FRESHER REQUIREMENTS:
 
 SECTION ORDER FOR FRESHERS:
 1. Contact Information
-2. Professional Summary (OPTIONAL - only if relevant experience exists)
+2. Career Objective (REQUIRED - 2 lines focusing on entry-level goals)
 3. Technical Skills
 4. Education (PROMINENT)
 5. Internships & Work Experience (IMPORTANT - includes all internships, trainings, and work)
@@ -92,20 +117,23 @@ SECTION ORDER FOR FRESHERS:
   const promptContent = `${getPromptForUserType(userType)}
 
 CRITICAL REQUIREMENTS FOR BULLET POINTS:
-1. Each bullet point must contain up to 20 words
-2. Include at least 30 relevant keywords from the job description across all bullet points
+1. Each bullet point MUST be concise, containing up to 20 words.
+2. Include at least 30 relevant keywords from the job description across all bullet points.
 3. Use STRONG ACTION VERBS only (no weak verbs like "helped", "assisted", "worked on", "was responsible for", "participated in", "involved in", "contributed to")
 4. Start each bullet with powerful verbs like: Developed, Implemented, Architected, Optimized, Engineered, Designed, Led, Managed, Created, Built, Delivered, Achieved, Increased, Reduced, Streamlined, Automated, Transformed, Executed, Spearheaded, Established
-5. No word should be repeated more than twice across all bullet points
-6. Quantify achievements with specific numbers, percentages, or metrics wherever possible
-7. Focus on RESULTS and IMPACT, not just tasks
-8. Don't give more than three bullet points for each project or work experience
-9. All section titles should be in ALL CAPS (e.g., WORK EXPERIENCE)
-10. Dates should be on the same line as roles/education, using format "Jan 2023 – Mar 2024"
-11. Ensure at least 70% of resume keywords match the job description for better ATS compatibility
-12. Avoid using adjectives like "passionate", "dedicated", or "hardworking" unless contextually backed with measurable achievements DO NOT add adjectives like “dedicated”, “motivated”, or “hardworking” unless backed by resume content.
-13. Penalize any section (WORK EXPERIENCE, PROJECTS, INTERNSHIPS) that lacks proper formatting:
+5. Ensure no word is repeated more than twice across all bullet points within a section.
+6. Quantify achievements with specific numbers, percentages, or metrics wherever possible, demonstrating clear impact and value. If direct quantification is not available, infer and suggest plausible metrics or outcomes. Vary the type of metrics used (e.g., time saved, revenue generated, efficiency improved, user growth).
+7. Focus on tangible RESULTS and measurable IMPACT, not just tasks or responsibilities.
+8. Do not give more than three bullet points for each project or work experience entry.
+9. All section titles MUST be in ALL CAPS (e.g., WORK EXPERIENCE, EDUCATION, PROJECTS).
+10. Dates should be on the same line as roles/education, using the exact format "Jan 2023 – Mar 2024".
+11. Integrate keywords naturally and contextually within sentences, avoiding keyword stuffing. Use synonyms or related terms where appropriate to enhance semantic matching.
+12. Ensure at least 70% of resume keywords match the job description for better ATS compatibility.
+13. Avoid using subjective adjectives like "passionate", "dedicated", or "hardworking" unless contextually backed with measurable achievements. DO NOT add adjectives like “dedicated”, “motivated”, or “hardworking” unless backed by resume content.
+14. Ensure all language is direct, professional, and free of jargon unless it's industry-standard and relevant to the JD.
+15. Penalize any section (WORK EXPERIENCE, PROJECTS, INTERNSHIPS) that lacks proper formatting or content quality:
     - Missing roles, company names, or dates
+    - Inconsistent date formats
     - More than 3 bullets per item
     - Bullets that do not begin with action verbs
     - No quantified metrics
@@ -113,10 +141,9 @@ CRITICAL REQUIREMENTS FOR BULLET POINTS:
     - Date format not in "Jan 2023 – Mar 2024" format
 14. If formatting is poor or inconsistent in any section, reduce overall score by 5–15% depending on severity.
 
-SKILLS REQUIREMENTS:
-1. Generate comprehensive skills based on the resume content and job description
-2. Include at least 6-8 skill categories
-3. Each category should have 5-8 specific skills
+SKILLS REQUIREMENTS: (Generate comprehensive skills based on the resume content and job description)
+1. Include at least 6-8 distinct skill categories.
+2. Each category should contain 5-8 specific, relevant skills.
 4. Match skills to job requirements and industry standards
 5. Include both technical and soft skills relevant to the role
 6.TO GENERATE SOFT SKILLS according jd
@@ -134,7 +161,7 @@ SOCIAL LINKS REQUIREMENTS - CRITICAL:
 TARGET ROLE INFORMATION:
 ${targetRole ? `Target Role: "${targetRole}"` : 'No specific target role provided'}
 
-CONDITIONAL SECTION GENERATION:
+CONDITIONAL SECTION GENERATION: (Ensure these sections are generated based on user type)
 ${userType === 'experienced' ? `
 - Professional Summary: REQUIRED - Create a compelling 2-3 line summary
 - Education: MINIMAL or OMIT unless specifically required by job
@@ -150,7 +177,7 @@ ${userType === 'experienced' ? `
 - Location: Include in contact information and education details
 ` : `
 - Professional Summary: OPTIONAL - only if candidate has relevant internships/experience
-- Education: PROMINENT - include degree, institution, year, relevant coursework if applicable
+- Career Objective: REQUIRED - Create a compelling 2-line objective focusing on entry-level goals.
 - Education: INCLUDE CGPA if mentioned in original resume (e.g., "CGPA: 8.4/10") and date format ex;2021-2024 
 - Academic Projects: IMPORTANT - treat as main experience section
 - Work Experience: COMBINE all internships, trainings, and work experience under this single section
@@ -178,7 +205,7 @@ Rules:
 JSON Structure:
 {
   "name": "${userName || '...'}",
-  "location": "...",
+  "location": "...", 
   "phone": "${userPhone || '...'}",
   "email": "${userEmail || '...'}",
   "linkedin": "${userLinkedin || linkedinUrl || '...'}",
@@ -186,7 +213,7 @@ JSON Structure:
   "targetRole": "${targetRole || '...'}",
   ${userType === 'experienced' ? '"summary": "...",' : ''}
   ${userType === 'student' ? '"careerObjective": "...",' : ''}
-  ${userType === 'fresher' ? '"summary": "...",' : ''}
+  ${userType === 'fresher' ? '"careerObjective": "...",' : ''}
   "education": [
     {"degree": "...", "school": "...", "year": "...", "cgpa": "...", "location": "..."}
   ],
@@ -215,106 +242,86 @@ User Type: ${userType.toUpperCase()}
 
 LinkedIn URL provided: ${linkedinUrl || 'NONE - leave empty'}
 GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
- 
-   const maxRetries = 5; // Increased from 3 to 5
-   let retryCount = 3;
-   let delay = 2000; // Increased from 1000 (1 second) to 2000 (2 seconds)
+
+  const maxRetries = 5;
+  let retryCount = 0;
+  let delay = 2000;
 
   while (retryCount < maxRetries) {
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          "HTTP-Referer": "https://primoboost.ai",
-          "X-Title": "PrimoBoost AI"
+          'HTTP-Referer': 'https://primoboost.ai',
+          'X-Title': 'PrimoBoost AI'
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            {
-              role: "user",
-              content: promptContent // Use promptContent here
-            }
-          ]
-        }),
+          model: 'google/gemini-2.5-flash',
+          messages: [{ role: 'user', content: promptContent }]
+        })
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('OpenRouter API error response:', errorText);
-
         if (response.status === 401) {
           throw new Error('Invalid API key. Please check your OpenRouter API key configuration.');
         } else if (response.status === 429 || response.status >= 500) {
-          // Retry for rate limits or server errors
-          console.warn(`Retrying due to OpenRouter API error: ${response.status}. Attempt ${retryCount + 1}/${maxRetries}. Retrying in ${delay / 1000}s...`);
           retryCount++;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2; // Exponential backoff
-          continue; // Continue to the next iteration of the while loop
+          if (retryCount >= maxRetries) throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+          await new Promise((r) => setTimeout(r, delay));
+          delay *= 2;
+          continue;
         } else {
-          // Non-retryable error
           throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
         }
       }
 
       const data = await response.json();
       let result = data?.choices?.[0]?.message?.content;
+      if (!result) throw new Error('No response content from OpenRouter API');
 
-      if (!result) {
-        throw new Error('No response content from OpenRouter API');
-      }
-
-      // Enhanced JSON extraction
       const jsonMatch = result.match(/```json\s*([\s\S]*?)\s*```/);
       let cleanedResult: string;
       if (jsonMatch && jsonMatch[1]) {
         cleanedResult = jsonMatch[1].trim();
       } else {
-        // Fallback to simpler cleaning if no ```json block is found
         cleanedResult = result.replace(/```json/g, '').replace(/```/g, '').trim();
       }
 
       try {
-        // ⬇️ CHANGED: make this mutable to allow deep cleaning reassignment
         let parsedResult = JSON.parse(cleanedResult);
 
-        // ⬇️ ADDED: Recursive cleaner to normalize placeholder values to empty strings
+        parsedResult = deepCleanComments(parsedResult);
+
         const EMPTY_TOKEN_RE = /^(?:n\/a|not\s*specified|none)$/i;
         const deepClean = (val: any): any => {
           if (typeof val === 'string') {
             const trimmed = val.trim();
             return EMPTY_TOKEN_RE.test(trimmed) ? '' : trimmed;
           }
-          if (Array.isArray(val)) {
-            return val.map(deepClean);
-          }
+          if (Array.isArray(val)) return val.map(deepClean);
           if (val && typeof val === 'object') {
             const out: Record<string, any> = {};
-            for (const k of Object.keys(val)) {
-              out[k] = deepClean(val[k]);
-            }
+            for (const k of Object.keys(val)) out[k] = deepClean(val[k]);
             return out;
           }
           return val;
         };
         parsedResult = deepClean(parsedResult);
 
-        // Ensure skills have proper count values
-        if (parsedResult.skills && Array.isArray(parsedResult.skills)) { // Line 303
+        if (parsedResult.skills && Array.isArray(parsedResult.skills)) {
           parsedResult.skills = parsedResult.skills.map((skill: any) => ({
             ...skill,
             count: skill.list ? skill.list.length : 0
           }));
         }
 
-        // ⬇️ CHANGED: Keep certifications as objects { title, description }
-        if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) { // Line 310
+        if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
           parsedResult.certifications = parsedResult.certifications
             .map((cert: any) => {
-              if (typeof cert === 'string') { // Line 312
+              if (typeof cert === 'string') {
                 return { title: cert.trim(), description: '' };
               }
               if (cert && typeof cert === 'object') {
@@ -338,77 +345,64 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
             .filter(Boolean);
         }
 
-        // Ensure work experience is properly formatted
-        if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) { // Line 340
-          parsedResult.workExperience = parsedResult.workExperience.filter((work: any) =>
-            work && work.role && work.company && work.year
+        if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) {
+          parsedResult.workExperience = parsedResult.workExperience.filter(
+            (work: any) => work && work.role && work.company && work.year
           );
         }
 
-        // Ensure projects are properly formatted
-        if (parsedResult.projects && Array.isArray(parsedResult.projects)) { // Line 346
-          parsedResult.projects = parsedResult.projects.filter((project: any) =>
-            project && project.title && project.bullets && project.bullets.length > 0
+        if (parsedResult.projects && Array.isArray(parsedResult.projects)) {
+          parsedResult.projects = parsedResult.projects.filter(
+            (project: any) => project && project.title && project.bullets && project.bullets.length > 0
           );
         }
 
-        // Prioritize user profile data first
-        parsedResult.name = userName || parsedResult.name || "";
-        
-        // FIXED: Prioritize user profile data for social links
-        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || ""; // Prioritize userLinkedin
-        parsedResult.github = userGithub || parsedResult.github || "";     // Prioritize userGithub
+        parsedResult.name = userName || parsedResult.name || '';
 
-        // Targeted cleaning and fallback for email
+        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || '';
+        parsedResult.github = userGithub || parsedResult.github || '';
+
         if (userEmail) {
-          parsedResult.email = userEmail; // Prioritize user provided email // Line 360
+          parsedResult.email = userEmail;
         } else if (parsedResult.email) {
           const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
-          const match = parsedResult.email.match(emailRegex);
-          parsedResult.email = match && match[0] ? match[0] : ""; // Extract valid email or set empty
+          const match = String(parsedResult.email).match(emailRegex);
+          parsedResult.email = match && match[0] ? match[0] : '';
         } else {
-          parsedResult.email = ""; // Ensure it's an empty string if nothing is found
+          parsedResult.email = '';
         }
 
-        // Targeted cleaning and fallback for phone
-        if (userPhone) { // Prioritize user provided phone
-          parsedResult.phone = userPhone; // Prioritize user provided phone // Line 370
+        if (userPhone) {
+          parsedResult.phone = userPhone;
         } else if (parsedResult.phone) {
-          // This regex tries to capture common phone number patterns including international codes, parentheses, spaces, and hyphens.
-          // It's designed to be robust but might need adjustments for very unusual formats.
           const phoneRegex = /(\+?\d{1,3}[-.\s]?)(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
-          const match = String(parsedResult.phone).match(phoneRegex); // Ensure parsedResult.phone is a string
-          parsedResult.phone = match && match[0] ? match[0] : ""; // FIXED: Extract the full matched phone number string // Line 376
+          const match = String(parsedResult.phone).match(phoneRegex);
+          parsedResult.phone = match && match[0] ? match[0] : '';
         } else {
-          parsedResult.phone = ""; // Ensure it's an empty string if nothing is found
+          parsedResult.phone = '';
         }
 
-        // Set the origin for JD-optimized resumes
-        parsedResult.origin = 'jd_optimized'; // ADDED LINE
+        parsedResult.origin = 'jd_optimized';
 
         return parsedResult;
       } catch (parseError) {
         console.error('JSON parsing error:', parseError);
-        console.error('Raw response attempted to parse:', cleanedResult); // Log the string that failed to parse
+        console.error('Raw response attempted to parse:', cleanedResult);
         throw new Error('Invalid JSON response from OpenRouter API');
       }
-    } catch (error) {
-      console.error('Error calling OpenRouter API:', error);
-
-      // Re-throw with more specific error message if it's already a known error
-      if (error instanceof Error && (
-          error.message.includes('API key') ||
+    } catch (error: any) {
+      if (
+        error instanceof Error &&
+        (error.message.includes('API key') ||
           error.message.includes('Rate limit') ||
           error.message.includes('service is temporarily unavailable') ||
-          error.message.includes('Invalid JSON response')
-      )) {
+          error.message.includes('Invalid JSON response'))
+      ) {
         throw error;
       }
-
-      // Generic error for network issues or other unknown errors
       throw new Error('Failed to connect to OpenRouter API. Please check your internet connection and try again.');
     }
   }
-  // If the loop finishes, it means all retries failed
+
   throw new Error(`Failed to optimize resume after ${maxRetries} attempts.`);
 };
