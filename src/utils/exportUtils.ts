@@ -680,7 +680,7 @@ function drawProfessionalSummary(state: PageState, summary: string, PDF_CONFIG: 
     maxWidth: PDF_CONFIG.contentWidth,
   });
   totalHeight += summaryHeight;
-  state.currentY += 2;
+
   return totalHeight;
 }
 
