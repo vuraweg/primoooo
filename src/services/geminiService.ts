@@ -4,69 +4,69 @@ import { ResumeData, UserType } from '../types/resume';
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 
 if (!OPENROUTER_API_KEY) {
-  throw new Error('OpenRouter API key is not configured. Please add VITE_OPENROUTER_API_KEY to your environment variables.');
+  throw new Error('OpenRouter API key is not configured. Please add VITE_OPENROUTER_API_KEY to your environment variables.');
 }
 
 const deepCleanComments = (val: any): any => {
-  const stripLineComments = (input: string): string => {
-    let cleanedInput = input;
+  const stripLineComments = (input: string): string => {
+    let cleanedInput = input;
 
-    // 1. Remove block comments /* ... */
-    cleanedInput = cleanedInput.replace(/\/\*[\s\S]*?\*\//g, '');
+    // 1. Remove block comments /* ... */
+    cleanedInput = cleanedInput.replace(/\/\*[\s\S]*?\*\//g, '');
 
-    // 2. Remove specific "// Line XXX" comments anywhere in the string
-    // This regex targets "// Line" followed by numbers and optional spaces, then removes it.
-    cleanedInput = cleanedInput.replace(/\/\/\s*Line\s*\d+\s*/g, '');
+    // 2. Remove specific "// Line XXX" comments anywhere in the string
+    // This regex targets "// Line" followed by numbers and optional spaces, then removes it.
+    cleanedInput = cleanedInput.replace(/\/\/\s*Line\s*\d+\s*/g, '');
 
-    // 3. Process line-by-line for traditional single-line comments (// at start or mid-line)
-    const lines = cleanedInput.split(/\r?\n/).map((line) => {
-      // If the line starts with //, remove the whole line
-      if (/^\s*\/\//.test(line)) return '';
+    // 3. Process line-by-line for traditional single-line comments (// at start or mid-line)
+    const lines = cleanedInput.split(/\r?\n/).map((line) => {
+      // If the line starts with //, remove the whole line
+      if (/^\s*\/\//.test(line)) return '';
 
-      // If // appears mid-line, remove from // to end of line, but only if it's not part of a URL
-      const idx = line.indexOf('//');
-      if (idx !== -1) {
-        const before = line.slice(0, idx);
-        // Check if it's not part of a URL (e.g., "https://")
-        if (!before.includes('://')) {
-          return line.slice(0, idx).trimEnd();
-        }
-      }
-      return line;
-    });
-    cleanedInput = lines.join('\n');
+      // If // appears mid-line, remove from // to end of line, but only if it's not part of a URL
+      const idx = line.indexOf('//');
+      if (idx !== -1) {
+        const before = line.slice(0, idx);
+        // Check if it's not part of a URL (e.g., "https://")
+        if (!before.includes('://')) {
+          return line.slice(0, idx).trimEnd();
+        }
+      }
+      return line;
+    });
+    cleanedInput = lines.join('\n');
 
-    // 4. Remove excessive newlines
-    cleanedInput = cleanedInput.replace(/\n{3,}/g, '\n\n');
+    // 4. Remove excessive newlines
+    cleanedInput = cleanedInput.replace(/\n{3,}/g, '\n\n');
 
-    return cleanedInput.trim();
-  };
-  if (typeof val === 'string') return stripLineComments(val);
-  if (Array.isArray(val)) return val.map(deepCleanComments);
-  if (val && typeof val === 'object') {
-    const out: Record<string, any> = {};
-    for (const k of Object.keys(val)) out[k] = deepCleanComments(val[k]);
-    return out;
-  }
-  return val;
+    return cleanedInput.trim();
+  };
+  if (typeof val === 'string') return stripLineComments(val);
+  if (Array.isArray(val)) return val.map(deepCleanComments);
+  if (val && typeof val === 'object') {
+    const out: Record<string, any> = {};
+    for (const k of Object.keys(val)) out[k] = deepCleanComments(val[k]);
+    return out;
+  }
+  return val;
 };
 
 export const optimizeResume = async (
-  resume: string,
-  jobDescription: string,
-  userType: UserType,
-  userName?: string,
-  userEmail?: string,
-  userPhone?: string,
-  userLinkedin?: string,
-  userGithub?: string,
-  linkedinUrl?: string,
-  githubUrl?: string,
-  targetRole?: string
+  resume: string,
+  jobDescription: string,
+  userType: UserType,
+  userName?: string,
+  userEmail?: string,
+  userPhone?: string,
+  userLinkedin?: string,
+  userGithub?: string,
+  linkedinUrl?: string,
+  githubUrl?: string,
+  targetRole?: string
 ): Promise<ResumeData> => {
-  const getPromptForUserType = (type: UserType) => {
-    if (type === 'experienced') {
-      return `You are a professional resume optimization assistant for EXPERIENCED PROFESSIONALS. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
+  const getPromptForUserType = (type: UserType) => {
+    if (type === 'experienced') {
+      return `You are a professional resume optimization assistant for EXPERIENCED PROFESSIONALS. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
 
 EXPERIENCED PROFESSIONAL REQUIREMENTS:
 1. MUST include a compelling Professional Summary (2-3 lines highlighting key experience and value proposition)
@@ -83,8 +83,8 @@ SECTION ORDER FOR EXPERIENCED PROFESSIONALS:
 5. Projects (if relevant to role)
 6. Certifications
 7. Education (minimal or omit if not required)`;
-    } else if (type === 'student') {
-      return `You are a professional resume optimization assistant for COLLEGE STUDENTS. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
+    } else if (type === 'student') {
+      return `You are a professional resume optimization assistant for COLLEGE STUDENTS. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
 
 COLLEGE STUDENT REQUIREMENTS:
 1. MUST include a compelling Career Objective (2 lines, ATS-readable, focusing on learning goals and internship aspirations)
@@ -106,8 +106,8 @@ SECTION ORDER FOR COLLEGE STUDENTS:
 7. Certifications
 8. Achievements (academic awards, competitions, etc.)
 9. Languages Known (if present in original resume)`;
-    } else {
-      return `You are a professional resume optimization assistant for FRESHERS/NEW GRADUATES. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
+    } else {
+      return `You are a professional resume optimization assistant for FRESHERS/NEW GRADUATES. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
 
 FRESHER REQUIREMENTS:
 1. MUST include a compelling Career Objective (2 lines MAX, ATS-readable, focusing on entry-level goals, relevant skills, and aspirations)
@@ -130,10 +130,10 @@ SECTION ORDER FOR FRESHERS:
 9. Certifications
 10. Languages Known (if present in original resume)
 11. Personal Details (if present in original resume)`;
-    }
-  };
+    }
+  };
 
-  const promptContent = `${getPromptForUserType(userType)}
+  const promptContent = `${getPromptForUserType(userType)}
 
 CRITICAL REQUIREMENTS FOR BULLET POINTS:
 1. Each bullet point MUST be concise, containing up to 20 words.
@@ -151,13 +151,13 @@ CRITICAL REQUIREMENTS FOR BULLET POINTS:
 13. Avoid using subjective adjectives like "passionate", "dedicated", or "hardworking" unless contextually backed with measurable achievements. DO NOT add adjectives like “dedicated”, “motivated”, or “hardworking” unless backed by resume content.
 14. Ensure all language is direct, professional, and free of jargon unless it's industry-standard and relevant to the JD.
 15. Penalize any section (WORK EXPERIENCE, PROJECTS, INTERNSHIPS) that lacks proper formatting or content quality:
-    - Missing roles, company names, or dates
-    - Inconsistent date formats
-    - More than 3 bullets per item
-    - Bullets that do not begin with action verbs
-    - No quantified metrics
-    - Disorganized or incomplete structure
-    - Date format not in "Jan 2023 – Mar 2024" format
+    - Missing roles, company names, or dates
+    - Inconsistent date formats
+    - More than 3 bullets per item
+    - Bullets that do not begin with action verbs
+    - No quantified metrics
+    - Disorganized or incomplete structure
+    - Date format not in "Jan 2023 – Mar 2024" format
 14. If formatting is poor or inconsistent in any section, reduce overall score by 5–15% depending on severity.
 
 SKILLS REQUIREMENTS: (Generate comprehensive skills based on the resume content and job description)
@@ -197,15 +197,15 @@ ${userType === 'experienced' ? `
 ` : `
 - Professional Summary: OPTIONAL - only if candidate has relevant internships/experience
 - Career Objective: REQUIRED - Create a compelling 2-line objective focusing on entry-level goals.
-- Education: INCLUDE CGPA if mentioned in original resume (e.g., "CGPA: 8.4/10") and date format ex;2021-2024 
+- Education: INCLUDE CGPA if mentioned in original resume (e.g., "CGPA: 8.4/10") and date format ex;2021-2024 
 - Academic Projects: IMPORTANT - treat as main experience section
 - Work Experience: COMBINE all internships, trainings, and work experience under this single section
 - Achievements: Include if present in original resume (academic awards, competitions, etc.)
 - Extra-curricular Activities: Include if present (leadership roles, clubs, volunteer work)
 - Certifications
 - Languages Known: Include if present (list languages with proficiency levels if available)
-- Personal Details (if present in original resume)`;
-    }
+- Personal Details (if present in original resume)`
+}
 
 IMPORTANT: Follow the exact structure provided below. Only include sections that have actual content.
 
@@ -223,33 +223,33 @@ Rules:
 
 JSON Structure:
 {
-  "name": "${userName || '...'}",
-  "location": "...", 
-  "phone": "${userPhone || '...'}",
-  "email": "${userEmail || '...'}",
-  "linkedin": "${userLinkedin || linkedinUrl || '...'}",
-  "github": "${userGithub || githubUrl || '...'}",
-  "targetRole": "${targetRole || '...'}",
-  ${userType === 'experienced' ? '"summary": "...",' : ''}
-  ${userType === 'student' ? '"careerObjective": "...",' : ''}
-  ${userType === 'fresher' ? '"careerObjective": "...",' : ''}
-  "education": [
-    {"degree": "...", "school": "...", "year": "...", "cgpa": "...", "location": "..."}
-  ],
-  "workExperience": [
-    {"role": "...", "company": "...", "year": "...", "bullets": ["...", "...", "..."]}
-  ],
-  "projects": [
-    {"title": "...", "bullets": ["...", "...", "..."]}
-  ],
-  "skills": [
-    {"category": "...", "count": 0, "list": ["...", "..."]}
-  ],
-  "certifications": [{"title": "...", "description": "..."}, "..."],
-  ${userType === 'fresher' || userType === 'student' ? `,
-  "achievements": ["...", "..."],
-  
-  "personalDetails": "..."` : ''}
+  "name": "${userName || '...'}",
+  "location": "...", 
+  "phone": "${userPhone || '...'}",
+  "email": "${userEmail || '...'}",
+  "linkedin": "${userLinkedin || linkedinUrl || '...'}",
+  "github": "${userGithub || githubUrl || '...'}",
+  "targetRole": "${targetRole || '...'}",
+  ${userType === 'experienced' ? '"summary": "...",' : ''}
+  ${userType === 'student' ? '"careerObjective": "...",' : ''}
+  ${userType === 'fresher' ? '"careerObjective": "...",' : ''}
+  "education": [
+    {"degree": "...", "school": "...", "year": "...", "cgpa": "...", "location": "..."}
+  ],
+  "workExperience": [
+    {"role": "...", "company": "...", "year": "...", "bullets": ["...", "...", "..."]}
+  ],
+  "projects": [
+    {"title": "...", "bullets": ["...", "...", "..."]}
+  ],
+  "skills": [
+    {"category": "...", "count": 0, "list": ["...", "..."]}
+  ],
+  "certifications": [{"title": "...", "description": "..."}, "..."],
+  ${userType === 'fresher' || userType === 'student' ? `
+  "achievements": ["...", "..."],
+  
+  "personalDetails": "..."` : ''}
 }
 Resume:
 ${resume}
@@ -262,166 +262,166 @@ User Type: ${userType.toUpperCase()}
 LinkedIn URL provided: ${linkedinUrl || 'NONE - leave empty'}
 GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
 
-  const maxRetries = 5;
-  let retryCount = 0;
-  let delay = 2000;
+  const maxRetries = 5;
+  let retryCount = 0;
+  let delay = 2000;
 
-  while (retryCount < maxRetries) {
-    try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://primoboost.ai',
-          'X-Title': 'PrimoBoost AI'
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [{ role: 'user', content: promptContent }]
-        })
-      });
+  while (retryCount < maxRetries) {
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://primoboost.ai',
+          'X-Title': 'PrimoBoost AI'
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [{ role: 'user', content: promptContent }]
+        })
+      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        if (response.status === 401) {
-          throw new Error('Invalid API key. Please check your OpenRouter API key configuration.');
-        } else if (response.status === 429 || response.status >= 500) {
-          retryCount++;
-          if (retryCount >= maxRetries) throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
-          await new Promise((r) => setTimeout(r, delay));
-          delay *= 2;
-          continue;
-        } else {
-          throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
-        }
-      }
+      if (!response.ok) {
+        const errorText = await response.text();
+        if (response.status === 401) {
+          throw new Error('Invalid API key. Please check your OpenRouter API key configuration.');
+        } else if (response.status === 429 || response.status >= 500) {
+          retryCount++;
+          if (retryCount >= maxRetries) throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+          await new Promise((r) => setTimeout(r, delay));
+          delay *= 2;
+          continue;
+        } else {
+          throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+        }
+      }
 
-      const data = await response.json();
-      let result = data?.choices?.[0]?.message?.content;
-      if (!result) throw new Error('No response content from OpenRouter API');
+      const data = await response.json();
+      let result = data?.choices?.[0]?.message?.content;
+      if (!result) throw new Error('No response content from OpenRouter API');
 
-      const jsonMatch = result.match(/```json\s*([\s\S]*?)\s*```/);
-      let cleanedResult: string;
-      if (jsonMatch && jsonMatch[1]) {
-        cleanedResult = jsonMatch[1].trim();
-      } else {
-        cleanedResult = result.replace(/```json/g, '').replace(/```/g, '').trim();
-      }
+      const jsonMatch = result.match(/```json\s*([\s\S]*?)\s*```/);
+      let cleanedResult: string;
+      if (jsonMatch && jsonMatch[1]) {
+        cleanedResult = jsonMatch[1].trim();
+      } else {
+        cleanedResult = result.replace(/```json/g, '').replace(/```/g, '').trim();
+      }
 
-      try {
-        let parsedResult = JSON.parse(cleanedResult);
+      try {
+        let parsedResult = JSON.parse(cleanedResult);
 
-        parsedResult = deepCleanComments(parsedResult);
+        parsedResult = deepCleanComments(parsedResult);
 
-        const EMPTY_TOKEN_RE = /^(?:n\/a|not\s*specified|none)$/i;
-        const deepClean = (val: any): any => {
-          if (typeof val === 'string') {
-            const trimmed = val.trim();
-            return EMPTY_TOKEN_RE.test(trimmed) ? '' : trimmed;
-          }
-          if (Array.isArray(val)) return val.map(deepClean);
-          if (val && typeof val === 'object') {
-            const out: Record<string, any> = {};
-            for (const k of Object.keys(val)) out[k] = deepClean(val[k]);
-            return out;
-          }
-          return val;
-        };
-        parsedResult = deepClean(parsedResult);
+        const EMPTY_TOKEN_RE = /^(?:n\/a|not\s*specified|none)$/i;
+        const deepClean = (val: any): any => {
+          if (typeof val === 'string') {
+            const trimmed = val.trim();
+            return EMPTY_TOKEN_RE.test(trimmed) ? '' : trimmed;
+          }
+          if (Array.isArray(val)) return val.map(deepClean);
+          if (val && typeof val === 'object') {
+            const out: Record<string, any> = {};
+            for (const k of Object.keys(val)) out[k] = deepClean(val[k]);
+            return out;
+          }
+          return val;
+        };
+        parsedResult = deepClean(parsedResult);
 
-        if (parsedResult.skills && Array.isArray(parsedResult.skills)) {
-          parsedResult.skills = parsedResult.skills.map((skill: any) => ({
-            ...skill,
-            count: skill.list ? skill.list.length : 0
-          }));
-        }
+        if (parsedResult.skills && Array.isArray(parsedResult.skills)) {
+          parsedResult.skills = parsedResult.skills.map((skill: any) => ({
+            ...skill,
+            count: skill.list ? skill.list.length : 0
+          }));
+        }
 
-        if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
-          parsedResult.certifications = parsedResult.certifications
-            .map((cert: any) => {
-              if (typeof cert === 'string') {
-                return { title: cert.trim(), description: '' };
-              }
-              if (cert && typeof cert === 'object') {
-                const title =
-                  (typeof cert.title === 'string' && cert.title) ||
-                  (typeof cert.name === 'string' && cert.name) ||
-                  (typeof cert.certificate === 'string' && cert.certificate) ||
-                  (typeof cert.issuer === 'string' && cert.issuer) ||
-                  (typeof cert.provider === 'string' && cert.provider) ||
-                  '';
-                const description =
-                  (typeof cert.description === 'string' && cert.description) ||
-                  (typeof cert.issuer === 'string' && cert.issuer) ||
-                  (typeof cert.provider === 'string' && cert.provider) ||
-                  '';
-                if (!title && !description) return null;
-                return { title: title.trim(), description: description.trim() };
-              }
-              return { title: String(cert), description: '' };
-            })
-            .filter(Boolean);
-        }
+        if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
+          parsedResult.certifications = parsedResult.certifications
+            .map((cert: any) => {
+              if (typeof cert === 'string') {
+                return { title: cert.trim(), description: '' };
+              }
+              if (cert && typeof cert === 'object') {
+                const title =
+                  (typeof cert.title === 'string' && cert.title) ||
+                  (typeof cert.name === 'string' && cert.name) ||
+                  (typeof cert.certificate === 'string' && cert.certificate) ||
+                  (typeof cert.issuer === 'string' && cert.issuer) ||
+                  (typeof cert.provider === 'string' && cert.provider) ||
+                  '';
+                const description =
+                  (typeof cert.description === 'string' && cert.description) ||
+                  (typeof cert.issuer === 'string' && cert.issuer) ||
+                  (typeof cert.provider === 'string' && cert.provider) ||
+                  '';
+                if (!title && !description) return null;
+                return { title: title.trim(), description: description.trim() };
+              }
+              return { title: String(cert), description: '' };
+            })
+            .filter(Boolean);
+        }
 
-        if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) {
-          parsedResult.workExperience = parsedResult.workExperience.filter(
-            (work: any) => work && work.role && work.company && work.year
-          );
-        }
+        if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) {
+          parsedResult.workExperience = parsedResult.workExperience.filter(
+            (work: any) => work && work.role && work.company && work.year
+          );
+        }
 
-        if (parsedResult.projects && Array.isArray(parsedResult.projects)) {
-          parsedResult.projects = parsedResult.projects.filter(
-            (project: any) => project && project.title && project.bullets && project.bullets.length > 0
-          );
-        }
+        if (parsedResult.projects && Array.isArray(parsedResult.projects)) {
+          parsedResult.projects = parsedResult.projects.filter(
+            (project: any) => project && project.title && project.bullets && project.bullets.length > 0
+          );
+        }
 
-        parsedResult.name = userName || parsedResult.name || '';
+        parsedResult.name = userName || parsedResult.name || '';
 
-        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || '';
-        parsedResult.github = userGithub || parsedResult.github || '';
+        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || '';
+        parsedResult.github = userGithub || parsedResult.github || '';
 
-        if (userEmail) {
-          parsedResult.email = userEmail;
-        } else if (parsedResult.email) {
-          const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
-          const match = String(parsedResult.email).match(emailRegex);
-          parsedResult.email = match && match[0] ? match[0] : '';
-        } else {
-          parsedResult.email = '';
-        }
+        if (userEmail) {
+          parsedResult.email = userEmail;
+        } else if (parsedResult.email) {
+          const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
+          const match = String(parsedResult.email).match(emailRegex);
+          parsedResult.email = match && match[0] ? match[0] : '';
+        } else {
+          parsedResult.email = '';
+        }
 
-        if (userPhone) {
-          parsedResult.phone = userPhone;
-        } else if (parsedResult.phone) {
-          const phoneRegex = /(\+?\d{1,3}[-.\s]?)(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
-          const match = String(parsedResult.phone).match(phoneRegex);
-          parsedResult.phone = match && match[0] ? match[0] : '';
-        } else {
-          parsedResult.phone = '';
-        }
+        if (userPhone) {
+          parsedResult.phone = userPhone;
+        } else if (parsedResult.phone) {
+          const phoneRegex = /(\+?\d{1,3}[-.\s]?)(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
+          const match = String(parsedResult.phone).match(phoneRegex);
+          parsedResult.phone = match && match[0] ? match[0] : '';
+        } else {
+          parsedResult.phone = '';
+        }
 
-        parsedResult.origin = 'jd_optimized';
+        parsedResult.origin = 'jd_optimized';
 
-        return parsedResult;
-      } catch (parseError) {
-        console.error('JSON parsing error:', parseError);
-        console.error('Raw response attempted to parse:', cleanedResult);
-        throw new Error('Invalid JSON response from OpenRouter API');
-      }
-    } catch (error: any) {
-      if (
-        error instanceof Error &&
-        (error.message.includes('API key') ||
-          error.message.includes('Rate limit') ||
-          error.message.includes('service is temporarily unavailable') ||
-          error.message.includes('Invalid JSON response'))
-      ) {
-        throw error;
-      }
-      throw new Error('Failed to connect to OpenRouter API. Please check your internet connection and try again.');
-    }
-  }
+        return parsedResult;
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        console.error('Raw response attempted to parse:', cleanedResult);
+        throw new Error('Invalid JSON response from OpenRouter API');
+      }
+    } catch (error: any) {
+      if (
+        error instanceof Error &&
+        (error.message.includes('API key') ||
+          error.message.includes('Rate limit') ||
+          error.message.includes('service is temporarily unavailable') ||
+          error.message.includes('Invalid JSON response'))
+      ) {
+        throw error;
+      }
+      throw new Error('Failed to connect to OpenRouter API. Please check your internet connection and try again.');
+    }
+  }
 
-  throw new Error(`Failed to optimize resume after ${maxRetries} attempts.`);
+  throw new Error(`Failed to optimize resume after ${maxRetries} attempts.`);
 };
