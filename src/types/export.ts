@@ -31,13 +31,13 @@ export const layoutConfigs = {
   standard: {
     name: 'Standard',
     description: 'Professional layout with optimal spacing',
-    margins: { top: 15, bottom: 10, left: 20, right: 20 },
+    margins: { top: 15, bottom: 15, left: 20, right: 20 },
     spacing: { section: 4, entry: 2.5 }
   },
   compact: {
     name: 'Compact',
     description: 'Condensed layout for more content',
-    margins: { top: 10, bottom: 5, left: 15, right: 15 },
+    margins: { top: 10, bottom: 10, left: 15, right: 15 },
     spacing: { section: 2.5, entry: 1.5 }
   }
 };

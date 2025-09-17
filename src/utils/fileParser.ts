@@ -1,8 +1,6 @@
-// src/utils/fileParser.ts
 import * as mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 import { createWorker } from 'tesseract.js';
-import { ExtractionResult, ExtractionMode } from '../types/resume'; // Import ExtractionResult and ExtractionMode
 
 // Set the worker source for PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -46,8 +44,7 @@ export const parseFile = async (file: File): Promise<ExtractionResult> => {
     trimmed,
     pages,
     chars_pre: charsPreTrim,
-    chars_post: charsPostTrim,
-    filename: file.name // Include the original filename
+    chars_post: charsPostTrim
   };
 };
 
