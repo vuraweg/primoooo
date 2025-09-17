@@ -353,11 +353,11 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         }
 
         // Prioritize user profile data first
-        parsedResult.name = userName || parsedResult.name || ""; // Line 352
+        parsedResult.name = userName || parsedResult.name || "";
         
         // FIXED: Prioritize user profile data for social links
-        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || ""; // Prioritize userLinkedin // Line 355
-        parsedResult.github = userGithub || parsedResult.github || "";     // Prioritize userGithub // Line 356
+        parsedResult.linkedin = userLinkedin || parsedResult.linkedin || ""; // Prioritize userLinkedin
+        parsedResult.github = userGithub || parsedResult.github || "";     // Prioritize userGithub
 
         // Targeted cleaning and fallback for email
         if (userEmail) {
@@ -371,7 +371,7 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         }
 
         // Targeted cleaning and fallback for phone
-        if (userPhone) {
+        if (userPhone) { // Prioritize user provided phone
           parsedResult.phone = userPhone; // Prioritize user provided phone // Line 370
         } else if (parsedResult.phone) {
           // This regex tries to capture common phone number patterns including international codes, parentheses, spaces, and hyphens.

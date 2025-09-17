@@ -118,10 +118,10 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
   const [optimizationInterrupted, setOptimizationInterrupted] = useState(false);
 
   const userName = (user as any)?.user_metadata?.name || '';
-  const userEmail = user?.email || '';
-  const userPhone = (user as any)?.user_metadata?.phone || '';
-  const userLinkedin = (user as any)?.user_metadata?.linkedin || linkedinUrl || '';
-  const userGithub = (user as any)?.user_metadata?.github || githubUrl || '';
+  const userEmail = user?.email || ''; // Correctly accesses email from user object
+  const userPhone = user?.phone || ''; // Correctly accesses phone from user object
+  const userLinkedin = user?.linkedin || ''; // Correctly accesses linkedin from user object
+  const userGithub = user?.github || ''; // Correctly accesses github from user object
 
   const handleStartNewResume = useCallback(() => { // Memoize
     setOptimizedResume(null);
