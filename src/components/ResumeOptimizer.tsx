@@ -305,9 +305,6 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
       onShowAuth();
       return;
     }
-
-    // Clear any previous interruption state at the start of optimization attempt
-    setOptimizationInterrupted(false);
     try {
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
@@ -322,12 +319,9 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
         return;
       }
       if (!userSubscription || (userSubscription.optimizationsTotal - userSubscription.optimizationsUsed) <= 0) {
-        // Re-fetch userSubscription here to ensure it's the absolute latest before checking credits
-        const latestUserSubscription = await paymentService.getUserSubscription(user.id);
-        if (!latestUserSubscription || (latestUserSubscription.optimizationsTotal - latestUserSubscription.optimizationsUsed) <= 0) {
+        setOptimizationInterrupted(true);
         onShowPlanSelection('optimizer');
         return;
-        }
       }
       setIsOptimizing(true);
       try {
@@ -380,10 +374,10 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
   }, [
     extractionResult,
     jobDescription,
-    user, // Keep user as a dependency
+    user,
     onShowAuth,
-    onShowPlanSelection, // Keep onShowPlanSelection as a dependency
-    userSubscription, // Keep userSubscription as a dependency for the useEffect below
+    userSubscription,
+    onShowPlanSelection,
     userType,
     userName,
     userEmail,
@@ -404,11 +398,13 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
   }, [setToolProcessTrigger, handleOptimize]);
 
   useEffect(() => {
-    // This useEffect should now primarily reset the flag, not re-trigger the process
-    // The actual re-triggering will be handled by toolProcessTrigger from App.tsx
-    if (optimizationInterrupted && userSubscription && (userSubscription.optimizationsTotal - userSubscription.optimizationsUsed) > 0) {
-      console.log('ResumeOptimizer: Optimization was interrupted, credits now available. Resetting flag.');
-      setOptimizationInterrupted(false); // Reset the flag
+    if (optimizationInterrupted && userSubscription) {
+      refreshUserSubscription().then(() => {
+        if (userSubscription && (userSubscription.optimizationsTotal - userSubscription.optimizationsUsed) > 0) {
+          setOptimizationInterrupted(false);
+          handleOptimize();
+        }
+      });
     }
   }, [optimizationInterrupted, refreshUserSubscription, userSubscription, handleOptimize]);
 
