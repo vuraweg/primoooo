@@ -680,14 +680,14 @@ function drawProfessionalSummary(state: PageState, summary: string, PDF_CONFIG: 
     maxWidth: PDF_CONFIG.contentWidth,
   });
   totalHeight += summaryHeight;
-  state.currentY += 2;
+  state.currentY += 3;
   return totalHeight;
 }
 
 function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: any): number {
   if (!isValidField(objective)) return 0;
   let totalHeight = drawSectionTitle(state, 'CAREER OBJECTIVE', PDF_CONFIG);
-  state.currentY += 1;
+  state.currentY += 3;
   const objectiveHeight = drawText(state, objective, PDF_CONFIG.margins.left, PDF_CONFIG, {
     fontSize: PDF_CONFIG.fonts.body.size,
     fontWeight: PDF_CONFIG.fonts.body.weight,
@@ -838,17 +838,12 @@ export const getFileName = (
   resumeData: ResumeData,
   fileExtension: 'pdf' | 'doc'
 ): string => {
-  const namePart =
-    toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
-
+  const namePart = toSafeText(resumeData.name).replace(/\s+/g, '_') || 'Resume';
   const rolePart = resumeData.targetRole
     ? `_${toSafeText(resumeData.targetRole).replace(/\s+/g, '_')}`
     : '';
-
-  // Final: name_role.pdf
-  return `${namePart}${rolePart}.${fileExtension}`;
+  return `${namePart}${rolePart}_Resume.${fileExtension}`;
 };
-
 
 // ---------- Word Export ----------
 export const exportToWord = async (
