@@ -341,7 +341,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
         } else {
           // Parse from extractionResult.text via AI as before
           const parsedResume = await optimizeResume(
-            processedResumeText,
+           extractionResult.text,
             jobDescription,
             userType,
             userName,
