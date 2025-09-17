@@ -680,14 +680,14 @@ function drawProfessionalSummary(state: PageState, summary: string, PDF_CONFIG: 
     maxWidth: PDF_CONFIG.contentWidth,
   });
   totalHeight += summaryHeight;
-
+  state.currentY += 2;
   return totalHeight;
 }
 
 function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: any): number {
   if (!isValidField(objective)) return 0;
   let totalHeight = drawSectionTitle(state, 'CAREER OBJECTIVE', PDF_CONFIG);
-  state.currentY += 3;
+  state.currentY += 1;
   const objectiveHeight = drawText(state, objective, PDF_CONFIG.margins.left, PDF_CONFIG, {
     fontSize: PDF_CONFIG.fonts.body.size,
     fontWeight: PDF_CONFIG.fonts.body.weight,
