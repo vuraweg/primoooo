@@ -91,7 +91,7 @@ SECTION ORDER FOR COLLEGE STUDENTS:
       return `You are a professional resume optimization assistant for FRESHERS/NEW GRADUATES. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
 
 FRESHER REQUIREMENTS:
-1. Professional Summary is OPTIONAL - only include if the candidate has relevant internships or strong projects
+1. MUST include a compelling Career Objective (2 lines, ATS-readable, focusing on learning goals and entry-level aspirations)
 2. PRIORITIZE Education, Academic Projects, and Internships
 3. Include additional sections that showcase potential: Achievements, Extra-curricular Activities, Languages
 4. Focus on academic projects, internships, and transferable skills
@@ -101,7 +101,7 @@ FRESHER REQUIREMENTS:
 
 SECTION ORDER FOR FRESHERS:
 1. Contact Information
-2. Professional Summary (OPTIONAL - only if relevant experience exists)
+2. Career Objective (REQUIRED - 2 lines focusing on entry-level goals)
 3. Technical Skills
 4. Education (PROMINENT)
 5. Internships & Work Experience (IMPORTANT - includes all internships, trainings, and work)
@@ -117,20 +117,23 @@ SECTION ORDER FOR FRESHERS:
   const promptContent = `${getPromptForUserType(userType)}
 
 CRITICAL REQUIREMENTS FOR BULLET POINTS:
-1. Each bullet point must contain up to 20 words
-2. Include at least 30 relevant keywords from the job description across all bullet points
+1. Each bullet point MUST be concise, containing up to 20 words.
+2. Include at least 30 relevant keywords from the job description across all bullet points.
 3. Use STRONG ACTION VERBS only (no weak verbs like "helped", "assisted", "worked on", "was responsible for", "participated in", "involved in", "contributed to")
 4. Start each bullet with powerful verbs like: Developed, Implemented, Architected, Optimized, Engineered, Designed, Led, Managed, Created, Built, Delivered, Achieved, Increased, Reduced, Streamlined, Automated, Transformed, Executed, Spearheaded, Established
-5. No word should be repeated more than twice across all bullet points
-6. Quantify achievements with specific numbers, percentages, or metrics wherever possible
-7. Focus on RESULTS and IMPACT, not just tasks
-8. Don't give more than three bullet points for each project or work experience
-9. All section titles should be in ALL CAPS (e.g., WORK EXPERIENCE)
-10. Dates should be on the same line as roles/education, using format "Jan 2023 – Mar 2024"
-11. Ensure at least 70% of resume keywords match the job description for better ATS compatibility
-12. Avoid using adjectives like "passionate", "dedicated", or "hardworking" unless contextually backed with measurable achievements DO NOT add adjectives like “dedicated”, “motivated”, or “hardworking” unless backed by resume content.
-13. Penalize any section (WORK EXPERIENCE, PROJECTS, INTERNSHIPS) that lacks proper formatting:
+5. Ensure no word is repeated more than twice across all bullet points within a section.
+6. Quantify achievements with specific numbers, percentages, or metrics wherever possible, demonstrating clear impact and value. If direct quantification is not available, infer and suggest plausible metrics or outcomes. Vary the type of metrics used (e.g., time saved, revenue generated, efficiency improved, user growth).
+7. Focus on tangible RESULTS and measurable IMPACT, not just tasks or responsibilities.
+8. Do not give more than three bullet points for each project or work experience entry.
+9. All section titles MUST be in ALL CAPS (e.g., WORK EXPERIENCE, EDUCATION, PROJECTS).
+10. Dates should be on the same line as roles/education, using the exact format "Jan 2023 – Mar 2024".
+11. Integrate keywords naturally and contextually within sentences, avoiding keyword stuffing. Use synonyms or related terms where appropriate to enhance semantic matching.
+12. Ensure at least 70% of resume keywords match the job description for better ATS compatibility.
+13. Avoid using subjective adjectives like "passionate", "dedicated", or "hardworking" unless contextually backed with measurable achievements. DO NOT add adjectives like “dedicated”, “motivated”, or “hardworking” unless backed by resume content.
+14. Ensure all language is direct, professional, and free of jargon unless it's industry-standard and relevant to the JD.
+15. Penalize any section (WORK EXPERIENCE, PROJECTS, INTERNSHIPS) that lacks proper formatting or content quality:
     - Missing roles, company names, or dates
+    - Inconsistent date formats
     - More than 3 bullets per item
     - Bullets that do not begin with action verbs
     - No quantified metrics
@@ -138,10 +141,9 @@ CRITICAL REQUIREMENTS FOR BULLET POINTS:
     - Date format not in "Jan 2023 – Mar 2024" format
 14. If formatting is poor or inconsistent in any section, reduce overall score by 5–15% depending on severity.
 
-SKILLS REQUIREMENTS:
-1. Generate comprehensive skills based on the resume content and job description
-2. Include at least 6-8 skill categories
-3. Each category should have 5-8 specific skills
+SKILLS REQUIREMENTS: (Generate comprehensive skills based on the resume content and job description)
+1. Include at least 6-8 distinct skill categories.
+2. Each category should contain 5-8 specific, relevant skills.
 4. Match skills to job requirements and industry standards
 5. Include both technical and soft skills relevant to the role
 6.TO GENERATE SOFT SKILLS according jd
@@ -159,7 +161,7 @@ SOCIAL LINKS REQUIREMENTS - CRITICAL:
 TARGET ROLE INFORMATION:
 ${targetRole ? `Target Role: "${targetRole}"` : 'No specific target role provided'}
 
-CONDITIONAL SECTION GENERATION:
+CONDITIONAL SECTION GENERATION: (Ensure these sections are generated based on user type)
 ${userType === 'experienced' ? `
 - Professional Summary: REQUIRED - Create a compelling 2-3 line summary
 - Education: MINIMAL or OMIT unless specifically required by job
@@ -175,7 +177,7 @@ ${userType === 'experienced' ? `
 - Location: Include in contact information and education details
 ` : `
 - Professional Summary: OPTIONAL - only if candidate has relevant internships/experience
-- Education: PROMINENT - include degree, institution, year, relevant coursework if applicable
+- Career Objective: REQUIRED - Create a compelling 2-line objective focusing on entry-level goals.
 - Education: INCLUDE CGPA if mentioned in original resume (e.g., "CGPA: 8.4/10") and date format ex;2021-2024 
 - Academic Projects: IMPORTANT - treat as main experience section
 - Work Experience: COMBINE all internships, trainings, and work experience under this single section
@@ -203,7 +205,7 @@ Rules:
 JSON Structure:
 {
   "name": "${userName || '...'}",
-  "location": "...",
+  "location": "...", 
   "phone": "${userPhone || '...'}",
   "email": "${userEmail || '...'}",
   "linkedin": "${userLinkedin || linkedinUrl || '...'}",
@@ -211,7 +213,7 @@ JSON Structure:
   "targetRole": "${targetRole || '...'}",
   ${userType === 'experienced' ? '"summary": "...",' : ''}
   ${userType === 'student' ? '"careerObjective": "...",' : ''}
-  ${userType === 'fresher' ? '"summary": "...",' : ''}
+  ${userType === 'fresher' ? '"careerObjective": "...",' : ''}
   "education": [
     {"degree": "...", "school": "...", "year": "...", "cgpa": "...", "location": "..."}
   ],
