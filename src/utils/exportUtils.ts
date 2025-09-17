@@ -834,8 +834,6 @@ export const exportToPDF = async (
 };
 
 // ---------- Filename Helper ----------
-// src/utils/exportUtils.ts
-// ...
 export const getFileName = (
   resumeData: ResumeData,
   fileExtension: 'pdf' | 'doc'
@@ -856,7 +854,6 @@ export const getFileName = (
     return `${namePart}.${fileExtension}`;
   }
 };
-// ...
 
 
 // ---------- Word Export ----------
