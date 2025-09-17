@@ -839,21 +839,17 @@ export const getFileName = (
   fileExtension: 'pdf' | 'doc'
 ): string => {
   const namePart =
-     toSafeText(resumeData.name).replace(/\s+/g, '') || 'Resume'; // Changed to remove all spaces
+    toSafeText(resumeData.name).replace(/\s+/g, '') || 'Resume';
 
+  const rolePart = resumeData.targetRole
+    ? toSafeText(resumeData.targetRole).replace(/\s+/g, '')
+    : '';
 
-   let rolePart = '';
-  if (resumeData.targetRole) {
-    rolePart = toSafeText(resumeData.targetRole).replace(/\s+/g, ''); // Changed to remove all spaces
-  }
-
-  // Final: firstname_lastname_associatesystemengineering.pdf
- if (rolePart) {
-    return `${namePart}${rolePart}.${fileExtension}`; // Concatenate directly
-  } else {
-    return `${namePart}.${fileExtension}`;
-  }
+  return rolePart
+    ? `${namePart}_${rolePart}.${fileExtension}`
+    : `${namePart}.${fileExtension}`;
 };
+
 
 
 // ---------- Word Export ----------
