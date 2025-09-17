@@ -78,7 +78,6 @@ export const ResumeScoreChecker: React.FC<ResumeScoreCheckerProps> = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingStep, setLoadingStep] = useState<string>('');
   const [scoreResult, setScoreResult] = useState<ComprehensiveScore | null>(null);
-  const [uploadedFilename, setUploadedFilename] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [hasShownCreditExhaustedAlert, setHasShownCreditExhaustedAlert] = useState(false);
 
@@ -144,8 +143,7 @@ export const ResumeScoreChecker: React.FC<ResumeScoreCheckerProps> = ({
         scoringMode === 'jd_based' ? jobTitle : undefined,
         scoringMode,
         extractionResult.extraction_mode,
-        extractionResult.trimmed,
-        uploadedFilename // Pass the filename here
+        extractionResult.trimmed
       );
 
       setScoreResult(result);
@@ -167,7 +165,7 @@ export const ResumeScoreChecker: React.FC<ResumeScoreCheckerProps> = ({
       setLoadingStep('');
       console.log('_analyzeResumeInternal: Analysis finished, setIsAnalyzing(false).');
     }
-  }, [extractionResult, jobDescription, jobTitle, scoringMode, isAuthenticated, onShowAuth, onShowSubscriptionPlans, onShowAlert, refreshUserSubscription, user, uploadedFilename]);
+  }, [extractionResult, jobDescription, jobTitle, scoringMode, isAuthenticated, onShowAuth, onShowSubscriptionPlans, onShowAlert, refreshUserSubscription, user]);
 
 
   // New public function called by the button click
@@ -308,7 +306,6 @@ export const ResumeScoreChecker: React.FC<ResumeScoreCheckerProps> = ({
   const handleFileUpload = (result: ExtractionResult) => {
     setExtractionResult(result);
     setHasShownCreditExhaustedAlert(false);
-    setUploadedFilename(result.filename || null);
     
     if (scoringMode === 'general' && autoScoreOnUpload && result.text.trim()) {
       setTimeout(() => analyzeResume(), 500);
