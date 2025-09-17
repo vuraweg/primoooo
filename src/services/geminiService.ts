@@ -8,11 +8,18 @@ if (!OPENROUTER_API_KEY) {
 }
 
 const deepCleanComments = (val: any): any => {
-   let cleanedInput = input;
-   cleanedInput = cleanedInput.replace(/\/\*[\s\S]*?\*\//g, '');
-  cleanedInput = cleanedInput.replace(/\/\/\s*Line\s*\d+\s*/g, '');
+  const stripLineComments = (input: string): string => {
+    let cleanedInput = input;
 
-  const lines = cleanedInput.split(/\r?\n/).map((line) => {
+    // 1. Remove block comments /* ... */
+    cleanedInput = cleanedInput.replace(/\/\*[\s\S]*?\*\//g, '');
+
+    // 2. Remove specific "// Line XXX" comments anywhere in the string
+    // This regex targets "// Line" followed by numbers and optional spaces, then removes it.
+    cleanedInput = cleanedInput.replace(/\/\/\s*Line\s*\d+\s*/g, '');
+
+    // 3. Process line-by-line for traditional single-line comments (// at start or mid-line)
+    const lines = cleanedInput.split(/\r?\n/).map((line) => {
       // If the line starts with //, remove the whole line
       if (/^\s*\/\//.test(line)) return '';
 
@@ -26,20 +33,13 @@ const deepCleanComments = (val: any): any => {
         }
       }
       return line;
-
-  const stripLineComments = (input: string): string => {
-    let out = input.replace(/\/\*[\s\S]*?\*\//g, '');
-    const lines = out.split(/\r?\n/).map((line) => {
-      if (/^\s*\/\//.test(line)) return '';
-      const idx = line.indexOf('//');
-      if (idx === -1) return line;
-      const before = line.slice(0, idx);
-      if (before.includes('://')) return line;
-      return line.slice(0, idx).trimEnd();
     });
-    out = lines.join('\n');
-    out = out.replace(/\n{3,}/g, '\n\n');
-    return out.trim();
+    cleanedInput = lines.join('\n');
+
+    // 4. Remove excessive newlines
+    cleanedInput = cleanedInput.replace(/\n{3,}/g, '\n\n');
+
+    return cleanedInput.trim();
   };
   if (typeof val === 'string') return stripLineComments(val);
   if (Array.isArray(val)) return val.map(deepCleanComments);
@@ -204,8 +204,8 @@ ${userType === 'experienced' ? `
 - Extra-curricular Activities: Include if present (leadership roles, clubs, volunteer work)
 - Certifications
 - Languages Known: Include if present (list languages with proficiency levels if available)
-- Personal Details: Include if present in original resume (brief personal information)
-`}
+- Personal Details (if present in original resume)`;
+    }
 
 IMPORTANT: Follow the exact structure provided below. Only include sections that have actual content.
 
