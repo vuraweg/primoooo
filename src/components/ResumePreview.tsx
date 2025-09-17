@@ -555,7 +555,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
         const hasAchievements = resumeData.achievements && resumeData.achievements.length > 0;
         const hasExtraCurricular = resumeData.extraCurricularActivities && resumeData.extraCurricularActivities.length > 0;
         const hasLanguages = resumeData.languagesKnown && resumeData.languagesKnown.length > 0;
-        const hasPersonalDetails = resumeData.personalDetails && resumeData.personalDetails.trim() !== '';
+        const hasPersonalDetails = typeof resumeData.personalDetails === 'string' && resumeData.personalDetails.trim() !== '';
 
         if (!hasAchievements && !hasExtraCurricular && !hasLanguages && !hasPersonalDetails) return null;
 
