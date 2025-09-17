@@ -904,6 +904,7 @@ const generateWordHTMLContent = (
   addContactFieldHtml('GitHub', data.github, 'url', 'http');
   addContactFieldHtml('Location', data.location, 'text');
 
+  if (contactParts.length === 0) return ''; // Return empty string if no valid contact info
   const contactInfo = contactParts.join(' | ');
 
   const summaryHtml =
@@ -929,7 +930,7 @@ const generateWordHTMLContent = (
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
               <div class="degree" style="font-size: 9.5pt; font-weight: bold; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.degree || ''}</div>
-              <div class="school" style="...">${edu.school || ''}${isValidField(edu.location) ? `, ${edu.location}` : ''}</div>
+              <div class="school" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${edu.school || ''}${isValidField(edu.location) ? `, ${edu.location}` : ''}</div>
 
               ${
                 isValidField(edu.cgpa)
@@ -937,8 +938,8 @@ const generateWordHTMLContent = (
                   : ''
               }
               ${
-                edu.relevantCoursework && edu.relevantCoursework.length > 0
-                  ? `<div style="font-size: 9.5pt; color: #4B5563; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Relevant Coursework: ${edu.relevantCoursework.join(
+                (edu as any).relevantCoursework && (edu as any).relevantCoursework.length > 0
+                  ? `<div style="font-size: 9.5pt; color: #4B5563; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Relevant Coursework: ${(edu as any).relevantCoursework.join(
                       ', '
                     )}</div>`
                   : ''
@@ -970,9 +971,9 @@ const generateWordHTMLContent = (
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 1pt;">
           <tr>
             <td style="padding: 0; vertical-align: top; text-align: left;">
-              <div class="job-title" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><b>${
+              <div class="job-title" style="font-size: 9.5pt; font-weight: bold; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">${
                 job.role || ''
-              }</b> | <b>${job.company || ''}</b>${isValidField(job.location) ? `, ${job.location}` : ''}</div>
+              } | ${job.company || ''}${isValidField(job.location) ? `, ${job.location}` : ''}</div>
             </td>
             <td style="padding: 0; vertical-align: top; text-align: right; white-space: nowrap;">
               <div class="year" style="font-size: 9.5pt; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold;">${
