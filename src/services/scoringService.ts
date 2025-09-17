@@ -165,7 +165,7 @@ Respond ONLY with valid JSON in this exact structure:
   "keyStrengths": ["strength1", "strength2", "strength3"],
   "improvementAreas": ["area1", "area2", "area3"],
   "recommendations": ["rec1", "rec2", "rec3"]
-};
+}`;
 
   const MAX_RETRIES = 3;
   let retryCount = 0;
@@ -176,7 +176,7 @@ Respond ONLY with valid JSON in this exact structure:
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
           "HTTP-Referer": "https://primoboost.ai",
           "X-Title": "PrimoBoost AI"
@@ -324,7 +324,7 @@ Respond ONLY with valid JSON in this exact structure:
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         "HTTP-Referer": "https://primoboost.ai",
         "X-Title": "PrimoBoost AI"
@@ -347,7 +347,7 @@ Respond ONLY with valid JSON in this exact structure:
     }
 
     const data = await response.json();
-    const result = data?.choices?.[0]?.message?.content;;
+    const result = data?.choices?.[0]?.message?.content;
 
     if (!result) {
       throw new Error('No response content from OpenRouter API');
@@ -520,12 +520,6 @@ Respond ONLY with valid JSON in this exact structure:
     }
   },
   "recommendations": ["recommendation1", "recommendation2", "recommendation3"],
-
-  CALCULATION OF TOTAL SCORE:
-1. Calculate initial sum: Sum of scores from all 9 categories (ATS Compatibility, Keyword & Skill Match, Project & Work Relevance, Structure & Flow, Critical Fixes & Red Flags, Impact Score, Brevity Score, Style Score, Skills Score).
-2. Apply missing section penalties: Deduct 10 points from the initial sum for EACH of the following key sections if it is missing or empty in the resume: 'summary', 'education', 'workExperience', 'projects', 'skills'.
-3. Apply section order penalty: Deduct an additional 10 points from the sum if the primary sections (Contact Info, Summary, Skills, Work Experience, Projects, Education) are not in a logical and standard professional order.
-4. The final 'totalScore' should be the result of these calculations, ensuring it does not go below 0.
   "grade": "A+"
 }`;
 
@@ -534,7 +528,7 @@ Respond ONLY with valid JSON in this exact structure:
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         "HTTP-Referer": "https://primoboost.ai",
         "X-Title": "PrimoBoost AI"
@@ -701,3 +695,4 @@ export const generateAfterScore = async (
     improvementAreas,
   };
 };
+
