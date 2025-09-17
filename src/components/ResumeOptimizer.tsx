@@ -327,6 +327,7 @@ const ResumeOptimizer: React.FC<ResumeOptimizerProps> = ({
         if (!latestUserSubscription || (latestUserSubscription.optimizationsTotal - latestUserSubscription.optimizationsUsed) <= 0) {
         onShowPlanSelection('optimizer');
         return;
+        }
       }
       setIsOptimizing(true);
       try {
