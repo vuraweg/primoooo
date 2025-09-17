@@ -67,13 +67,15 @@ export const ResumeExportSettings: React.FC<ResumeExportSettingsProps> = ({
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3 dark:text-gray-300">Layout Type</label>
             <div className="grid grid-cols-2 gap-4">
-              {Object.entries(layoutConfigs).map(([key, config]) => (
+                        {Object.entries(layoutConfigs)
+              .filter(([key]) => key === 'standard') // Add this filter
+              .map(([key, config]) => (
                 <button
                   key={key}
                   onClick={() => handleOptionChange('layoutType', key as LayoutType)}
                   className={`flex flex-col items-center p-4 rounded-lg border-2 transition-all dark:bg-dark-100 ${
-                    options.layoutType === key 
-                      ? 'border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/20' 
+                    options.layoutType === key
+                      ? 'border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/20'
                       : 'border-gray-200 hover:border-blue-300 dark:border-gray-700 dark:hover:border-blue-500'
                   }`}
                 >
@@ -90,6 +92,7 @@ export const ResumeExportSettings: React.FC<ResumeExportSettingsProps> = ({
                   )}
                 </button>
               ))}
+
             </div>
           </div>
 
