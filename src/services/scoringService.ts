@@ -40,8 +40,7 @@ export const getComprehensiveScore = async (
   jobTitle?: string,
   scoringMode: ScoringMode = 'general',
   extractionMode: ExtractionMode = 'TEXT',
-  trimmed: boolean = false,
-  filename?: string // Added for filename scoring
+  trimmed: boolean = false
 ): Promise<ComprehensiveScore> => {
   // Check cache first
   const cacheKey = await generateCacheKey(resumeText, jobDescription, jobTitle);
@@ -63,7 +62,6 @@ ${resumeText}
 
 ${jobDescription ? `JOB DESCRIPTION:\n${jobDescription}\n` : ''}
 ${jobTitle ? `JOB TITLE: ${jobTitle}\n` : ''}
-${filename ? `RESUME FILENAME: ${filename}\n` : ''}
 
 SCORING MODE: ${scoringMode.toUpperCase()}
 EXTRACTION MODE: ${extractionMode}
@@ -86,14 +84,10 @@ SCORING RUBRIC (16 metrics, weights sum = 140, normalized to 0-100):
 13. content_quality (4 points): Writing quality and professional presentation
 14. grammar_spelling (3 points): Language accuracy and professionalism
 15. resume_length (2 points): Appropriate length for experience level
-16. filename_format (2 points): Professionalism of the resume filename.
-    - 2 points: Format is "FirstName_LastName_JobTitle.pdf" or similar professional, specific naming (e.g., "John_Doe_SoftwareEngineer.pdf").
-    - 1 point: Format includes name but is generic (e.g., "JohnDoeResume.pdf", "MyResume.pdf").
-    - 0 points: Generic name (e.g., "resume.pdf", "document.pdf") or contains special characters/spaces.
 
 CALCULATION:
-- Calculate weighted sum: Σ(score_i × weight_i) (Total possible points: 142)
-- Normalize to 0-100: (weighted_sum / 142) × 100
+- Calculate weighted sum: Σ(score_i × weight_i)
+- Normalize to 0-100: (weighted_sum / 140) × 100
 - Map to match bands and interview probability ranges
 
 MATCH BANDS:
@@ -121,7 +115,7 @@ Respond ONLY with valid JSON in this exact structure:
   "match_band": "Excellent Match|Very Good Match|Good Match|Fair Match|Below Average|Poor Match|Very Poor|Inadequate|Minimal Match|No Match",
   "interview_probability_range": "95-100%|85-94%|70-84%|50-69%|30-49%|15-29%|5-14%|0.1-1%|0%",
   "confidence": "High|Medium|Low",
-  "rubric_version": "ats_v1.1-weights142",
+  "rubric_version": "ats_v1.0-weights140",
   "weighting_mode": "${scoringMode === 'jd_based' ? 'JD' : 'GENERAL'}",
   "extraction_mode": "${extractionMode}",
   "trimmed": ${trimmed},
@@ -135,15 +129,6 @@ Respond ONLY with valid JSON in this exact structure:
       "max_score": 25,
       "contribution": 0.0,
       "details": "Detailed explanation of keyword matching analysis"
-    },
-    {
-      "key": "filename_format",
-      "name": "Filename Format",
-      "weight_pct": 1.4,
-      "score": 0-2,
-      "max_score": 2,
-      "contribution": 0.0,
-      "details": "Evaluation of the filename format (e.g., 'FirstName_LastName_JobTitle.pdf' vs 'resume.pdf')"
     }
   ],
   ${scoringMode === 'jd_based' ? '"missing_keywords": ["keyword1", "keyword2", "keyword3"],' : '"missing_keywords": [],'}
@@ -165,7 +150,8 @@ Respond ONLY with valid JSON in this exact structure:
   "keyStrengths": ["strength1", "strength2", "strength3"],
   "improvementAreas": ["area1", "area2", "area3"],
   "recommendations": ["rec1", "rec2", "rec3"]
-};
+}
+`;
 
   const MAX_RETRIES = 3;
   let retryCount = 0;
@@ -256,7 +242,7 @@ Respond ONLY with valid JSON in this exact structure:
     match_band: "No Match",
     interview_probability_range: "0%",
     confidence: "Low",
-    rubric_version: "ats_v1.1-weights142",
+    rubric_version: "ats_v1.0-weights140",
     weighting_mode: scoringMode === 'jd_based' ? 'JD' : 'GENERAL',
     extraction_mode: extractionMode,
     trimmed: trimmed,
@@ -701,4 +687,3 @@ export const generateAfterScore = async (
     improvementAreas,
   };
 };
-
