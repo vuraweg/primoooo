@@ -22,6 +22,12 @@ import { exportToPDF, exportToWord } from '../utils/exportUtils';
 import { useNavigate } from 'react-router-dom';
 import { ExportButtons } from './ExportButtons';
 
+const cleanResumeText = (text: string): string => { // <-- Moved here
+  return text.split('\n')
+             .filter(line => !line.trim().startsWith('// Line') && !line.trim().startsWith('// MODIFIED:'))
+             .join('\n');
+};
+
 interface ResumeOptimizerProps {
   isAuthenticated: boolean;
   onShowAuth: () => void;
