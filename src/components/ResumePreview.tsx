@@ -216,7 +216,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
         // Conditional logic for 'Professional Summary' or 'Career Objective' based on layoutType
         const summaryLayout = layoutType;
         
-        if (userType === 'student') {
+              if (userType === 'student' || userType === 'fresher') { // Modified condition
           if (!resumeData.careerObjective || resumeData.careerObjective.trim() === '') return null;
           return (
             <div style={{ marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px' }}>
@@ -228,10 +228,10 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
               </p>
             </div>
           );
-        } else { // 'experienced' or 'fresher'
+        } else { // This will now only be for 'experienced'
           if (!resumeData.summary || resumeData.summary.trim() === '') return null;
           return (
-            <div style={{ 
+            <div style={{
               marginBottom: exportOptions ? `${mmToPx(exportOptions.sectionSpacing * 0.5)}px` : '16px',
               ...(summaryLayout === 'compact' && { // Apply compact styling for summary
                 backgroundColor: '#f8f9fa',
@@ -249,6 +249,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
             </div>
           );
         }
+
 
       case 'workExperience':
         if (!resumeData.workExperience || resumeData.workExperience.length === 0) return null;
