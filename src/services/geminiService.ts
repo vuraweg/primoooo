@@ -91,7 +91,7 @@ SECTION ORDER FOR COLLEGE STUDENTS:
       return `You are a professional resume optimization assistant for FRESHERS/NEW GRADUATES. Analyze the provided resume and job description, then create an optimized resume that better matches the job requirements.
 
 FRESHER REQUIREMENTS:
-1. MUST include a compelling Career Objective (2 lines, ATS-readable, focusing on learning goals and entry-level aspirations)
+1. MUST include a compelling Career Objective (2 lines MAX, ATS-readable, focusing on entry-level goals, relevant skills, and aspirations)
 2. PRIORITIZE Education, Academic Projects, and Internships
 3. Include additional sections that showcase potential: Achievements, Extra-curricular Activities, Languages
 4. Focus on academic projects, internships, and transferable skills
