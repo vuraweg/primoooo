@@ -67,7 +67,7 @@ const createPDFConfig = (options: ExportOptions) => {
   spacing: {
     nameFromTop: 13,
     afterName: 0,
-    afterContact: 3,
+    afterContact: 1,
     sectionSpacingBefore: options.sectionSpacing,
     sectionSpacingAfter: 2,
     bulletListSpacing: options.entrySpacing * 0.3,
@@ -694,7 +694,7 @@ function drawCareerObjective(state: PageState, objective: string, PDF_CONFIG: an
     maxWidth: PDF_CONFIG.contentWidth,
   });
   totalHeight += objectiveHeight;
-  state.currentY += PDF_CONFIG.spacing.entrySpacing * 8.5;
+  state.currentY += 3;
   return totalHeight;
 }
 
