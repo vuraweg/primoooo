@@ -26,7 +26,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ResumeData, UserType } from '../types/resume';
-import { GuidedPersonalInfo } from './GuidedPersonalInfo';
+
 import { GuidedExperienceLevel } from './GuidedExperienceLevel';
 import { GuidedEducation } from './GuidedEducation';
 import { GuidedWorkExperience } from './GuidedWorkExperience';
