@@ -32,8 +32,7 @@ import { GuidedEducation } from './GuidedEducation';
 import { GuidedWorkExperience } from './GuidedWorkExperience';
 import { GuidedProjects } from './GuidedProjects';
 import { GuidedSkills } from './GuidedSkills';
-import { GuidedCertifications } from './GuidedCertifications'; // NEW IMPORT
-import { GuidedAchievements } from './GuidedAchievements'; // NEW IMPORT
+
 import { ResumePreview } from './ResumePreview';
 import { LoadingAnimation } from './LoadingAnimation';
 import { paymentService } from '../services/paymentService';
