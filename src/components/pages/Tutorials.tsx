@@ -258,46 +258,7 @@ export const Tutorials: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 relative dark:from-dark-50 dark:to-dark-200 transition-colors duration-300">
       {/* Hero */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#5B00F7] via-[#2E73FF] to-[#5B00F7]" />
-        <div className="absolute top-20 left-20 w-40 h-40 bg-white/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-32 right-32 w-60 h-60 bg-white/10 rounded-full blur-[150px]" />
-        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-sm w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg">
-            <Video className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
-            Learn & Master <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5B00F7] to-[#2E73FF]">
-              Resume Optimization
-            </span>
-          </h1>
-          <p className="text-lg md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto">
-            Watch our tutorial video to learn how to create the perfect resume and land your dream
-            job with AI-powered optimization.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <ModernButton
-              size="sm"
-              className="bg-gradient-to-r from-[#5B00F7] to-[#2E73FF] text-white font-semibold px-6 py-4 rounded-xl flex items-center gap-3 hover:opacity-90 transition"
-              onClick={() =>
-                mainVideoTutorial && openVideoModal(mainVideoTutorial.videoUrl, mainVideoTutorial.title)
-              }
-            >
-              <Play className="w-6 h-6" />
-              Watch Video Tutorial
-            </ModernButton>
-            <ModernButton
-              variant="secondary"
-              size="sm"
-              className="bg-[#FFD33D] text-black font-semibold px-6 py-4 rounded-xl flex items-center gap-3 hover:brightness-95 transition"
-            >
-              <BookOpen className="w-6 h-6" />
-              Free Resources
-            </ModernButton>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Featured Tutorial */}
       <section className="py-20 bg-white dark:bg-dark-100">
