@@ -23,7 +23,6 @@ import {
   X,
   Building,
   Calendar,
-  Link as LinkIcon, // <-- import Link icon as LinkIcon to avoid name collision
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,8 +40,7 @@ interface PersonalInfoData {
   linkedin: string;
   github: string;
   location: string;
-  summary: string;
-  careerObjective: string;
+  // Removed summary and careerObjective
   targetRole: string;
 }
 
@@ -114,8 +112,7 @@ export const GuidedResumeBuilder: React.FC<GuidedResumeBuilderProps> = ({
     linkedin: user?.linkedin || '',
     github: user?.github || '',
     location: '',
-    summary: '',
-    careerObjective: '',
+    // Removed summary and careerObjective from initial state
     targetRole: '',
   });
   const [education, setEducation] = useState<EducationData[]>([
@@ -151,8 +148,7 @@ export const GuidedResumeBuilder: React.FC<GuidedResumeBuilderProps> = ({
       github: personalInfo.github,
       location: personalInfo.location,
       targetRole: personalInfo.targetRole,
-      summary: userType === 'experienced' ? personalInfo.summary : undefined,
-      careerObjective: userType !== 'experienced' ? personalInfo.careerObjective : undefined,
+      // Removed summary and careerObjective from generated data
       education: education.filter(edu => edu.degree.trim() || edu.school.trim() || edu.year.trim()),
       workExperience: workExperience.filter(we => we.role.trim() || we.company.trim() || we.year.trim()).map(we => ({
         ...we,
@@ -473,20 +469,6 @@ export const GuidedResumeBuilder: React.FC<GuidedResumeBuilderProps> = ({
                 <input type="text" value={personalInfo.targetRole} onChange={(e) => handlePersonalInfoChange({ ...personalInfo, targetRole: e.target.value })} placeholder="e.g., Software Engineer, Product Manager" className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm min-h-[44px]" />
               </div>
             </div>
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Professional Summary (for Experienced Professionals)</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><FileText className="h-5 w-5 text-gray-400" /></div>
-                <textarea value={personalInfo.summary} onChange={(e) => handlePersonalInfoChange({ ...personalInfo, summary: e.target.value })} placeholder="A concise overview of your professional experience and career goals." rows={4} className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm min-h-[44px] resize-y" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Career Objective (for Freshers/Students)</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><FileText className="h-5 w-5 text-gray-400" /></div>
-                <textarea value={personalInfo.careerObjective} onChange={(e) => handlePersonalInfoChange({ ...personalInfo, careerObjective: e.target.value })} placeholder="A brief statement outlining your career aspirations and what you hope to achieve." rows={2} className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm min-h-[44px] resize-y" />
-              </div>
-            </div>
           </div>
         </div>
       ),
@@ -675,9 +657,7 @@ export const GuidedResumeBuilder: React.FC<GuidedResumeBuilderProps> = ({
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">GitHub URL (Optional)</label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <LinkIcon className="h-5 w-5 text-gray-400" /> {/* use the icon safely */}
-                    </div>
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Link className="h-5 w-5 text-gray-400" /></div>
                     <input type="url" value={project.githubUrl || ''} onChange={(e) => updateProject(projectIndex, 'githubUrl', e.target.value)} placeholder="https://github.com/yourproject" className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm min-h-[44px]" />
                   </div>
                 </div>
@@ -730,33 +710,8 @@ export const GuidedResumeBuilder: React.FC<GuidedResumeBuilderProps> = ({
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Skills (comma-separated or add individually)</label>
                   <div className="flex flex-col sm:flex-row gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={''}
-                      onChange={() => {}}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          addSkillToCategory(categoryIndex, e.currentTarget.value);
-                          e.currentTarget.value = '';
-                        }
-                      }}
-                      placeholder="e.g., JavaScript, React, Node.js"
-                      className="w-full sm:flex-1 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm min-h-[44px]"
-                    />
-                    <button
-                      onClick={() => {
-                        const inputElement = document.querySelector<HTMLInputElement>(
-                          `input[placeholder="e.g., JavaScript, React, Node.js"]`
-                        );
-                        if (inputElement) {
-                          addSkillToCategory(categoryIndex, inputElement.value);
-                          inputElement.value = '';
-                        }
-                      }}
-                      className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-3 py-3 rounded-lg transition-colors text-sm min-h-[44px]"
-                    >
-                      Add
-                    </button>
+                    <input type="text" value={''} onChange={() => {}} onKeyPress={(e) => { if (e.key === 'Enter') { addSkillToCategory(categoryIndex, e.currentTarget.value); e.currentTarget.value = ''; } }} placeholder="e.g., JavaScript, React, Node.js" className="w-full sm:flex-1 px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm min-h-[44px]" />
+                    <button onClick={() => { const inputElement = document.querySelector<HTMLInputElement>(`input[placeholder="e.g., JavaScript, React, Node.js"]`); if (inputElement) { addSkillToCategory(categoryIndex, inputElement.value); inputElement.value = ''; } }} className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-3 py-3 rounded-lg transition-colors text-sm min-h-[44px]">Add</button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {skillCategory.list.map((skill: string, skillIndex: number) => (
@@ -946,8 +901,7 @@ export const GuidedResumeBuilder: React.FC<GuidedResumeBuilderProps> = ({
                     linkedin: user?.linkedin || '',
                     github: user?.github || '',
                     location: '',
-                    summary: '',
-                    careerObjective: '',
+                    // Removed summary and careerObjective from reset
                     targetRole: '',
                   });
                   setEducation([{ degree: '', school: '', year: '', cgpa: '', location: '' }]);
