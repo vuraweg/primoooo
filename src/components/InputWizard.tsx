@@ -91,7 +91,7 @@ export const InputWizard: React.FC<InputWizardProps> = ({
           />
         </div>
       ),
-      isValid: extractionResult.text.trim().length > 0 && (scoringMode === 'general' || jobDescription.trim().length > 0)
+      isValid: extractionResult.text.trim().length > 0 && (scoringMode === 'general' || jobDescription.trim().length >250)
     },
     {
       id: 'social',
