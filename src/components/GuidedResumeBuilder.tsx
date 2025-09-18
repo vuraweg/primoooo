@@ -151,18 +151,78 @@ export const GuidedResumeBuilder: React.FC<GuidedResumeBuilderProps> = ({
       icon: <Code className="w-6 h-6" />,
       component: <ProjectsStep resumeData={resumeData} setResumeData={setResumeData} />
     },
-    {
+   {
       id: 'skills',
       title: 'Skills',
       icon: <Target className="w-6 h-6" />,
-      component: <SkillsStep resumeData={resumeData} setResumeData={setResumeData} />
+      component: (
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 dark:bg-dark-50 dark:border-dark-400">
+          <GuidedSkills skills={skills} onSkillsChange={setSkills} />
+        </div>
+      ),
+      isValid: skills.some((s) => s.category.trim() !== '' && s.list.some((item) => item.trim() !== '')),
+    },
+    { // NEW STEP: Certifications
+      id: 'certifications',
+      title: 'Certifications',
+      icon: <Award className="w-6 h-6" />,
+      component: (
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 dark:bg-dark-50 dark:border-dark-400">
+          <GuidedCertifications certifications={certifications} onCertificationsChange={setCertifications} />
+        </div>
+      ),
+      isValid: true // Certifications are optional, so always valid to proceed
+    },
+    { // NEW STEP: Achievements
+      id: 'achievements',
+      title: 'Achievements',
+      icon: <Award className="w-6 h-6" />,
+      component: (
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 dark:bg-dark-50 dark:border-dark-400">
+          <GuidedAchievements achievements={achievements} onAchievementsChange={setAchievements} />
+        </div>
+      ),
+      isValid: true // Achievements are optional, so always valid to proceed
     },
     {
       id: 'review',
       title: 'Review & Generate',
       icon: <Eye className="w-6 h-6" />,
-      component: <ReviewStep resumeData={resumeData} userType={userType} onGenerate={handleGenerate} isGenerating={isGenerating} />
-    }
+      component: (
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 dark:bg-dark-50 dark:border-dark-400">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+            <Eye className="w-5 h-5 mr-2 text-blue-600" />
+            Review Your Resume
+          </h2>
+          <div className="mb-6">
+            <ResumePreview resumeData={generateResumeData()} userType={userType} />
+          </div>
+          <button
+            onClick={handleGenerateResume}
+            disabled={isGenerating || loadingScore}
+            className="w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl"
+          >
+            {isGenerating || loadingScore ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>{loadingScore ? 'Calculating Score...' : 'Generating Resume...'}</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-6 h-6" />
+                <span>Generate Final Resume</span>
+              </>
+            )}
+          </button>
+          {score !== null && (
+            <div className="mt-4 text-center text-lg font-semibold text-gray-900">
+              Resume Score: {score}%
+            </div>
+          )}
+        </div>
+      ),
+      isValid: true,
+    },
   ];
 
   async function handleGenerate() {
