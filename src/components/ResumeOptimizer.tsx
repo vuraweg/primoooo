@@ -22,11 +22,20 @@ import { exportToPDF, exportToWord } from '../utils/exportUtils';
 import { useNavigate } from 'react-router-dom';
 import { ExportButtons } from './ExportButtons';
 
-const cleanResumeText = (text: string): string => { // <-- Moved here
-  return text.split('\n')
-             .filter(line => !line.trim().startsWith('// Line') && !line.trim().startsWith('// MODIFIED:'))
-             .join('\n');
+// src/components/ResumeOptimizer.tsx
+const cleanResumeText = (text: string): string => {
+  let cleaned = text;
+  // Remove "// Line XXX" patterns anywhere in the text
+  cleaned = cleaned.replace(/\/\/\s*Line\s*\d+\s*/g, '');
+  // Remove "// MODIFIED:" patterns anywhere in the text (e.g., "// MODIFIED: listStyleType to 'none'")
+  cleaned = cleaned.replace(/\/\/\s*MODIFIED:\s*.*?(?=\n|$)/g, ''); // Catches the whole comment line
+  // Also remove any remaining single-line comments that might have slipped through or were on their own line
+  cleaned = cleaned.split('\n')
+                   .filter(line => !line.trim().startsWith('//')) // Remove lines that start with //
+                   .join('\n');
+  return cleaned;
 };
+
 
 interface ResumeOptimizerProps {
   isAuthenticated: boolean;
