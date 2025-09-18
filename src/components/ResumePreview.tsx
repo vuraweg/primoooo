@@ -568,58 +568,60 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({
     } ${
       currentExportOptions.paperSize === 'letter' ? 'resume-letter' : 'resume-a4'
     }`}>
-      <div
-        className="max-h-[70vh] sm:max-h-[80vh] lg:max-h-[800px] overflow-y-auto dark:bg-dark-100"
-        style={{
-          fontFamily: `${PDF_CONFIG.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif`,
-          fontSize: ptToPx(PDF_CONFIG.fonts.body.size),
-          lineHeight: PDF_CONFIG.spacing.lineHeight,
-          color: 'inherit',
-          marginTop: mmToPx(PDF_CONFIG.margins.top),
-          marginBottom: mmToPx(PDF_CONFIG.margins.bottom),
-          marginLeft: mmToPx(PDF_CONFIG.margins.left),
-          marginRight: mmToPx(PDF_CONFIG.margins.right),
-        }}
-      >
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: mmToPx(PDF_CONFIG.spacing.afterContact) }}> {/* Adjusted margin-bottom */}
-          <h1 style={{
-            fontSize: ptToPx(PDF_CONFIG.fonts.name.size),
-            fontWeight: 'bold',
-            letterSpacing: '1pt',
-            marginBottom: mmToPx(PDF_CONFIG.spacing.afterName), // Use afterName spacing
+      {/* New wrapper div for scrolling */}
+      <div className="max-h-[70vh] sm:max-h-[80vh] lg:max-h-[800px] overflow-y-auto">
+        <div
+          style={{
             fontFamily: `${PDF_CONFIG.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif`,
-            textTransform: 'uppercase'
-          }}>
-            {resumeData.name}
-          </h1>
-
-          {contactElements.length > 0 && (
-            <div style={{
-              fontSize: ptToPx(PDF_CONFIG.fonts.contact.size),
-              fontWeight: 'bold', // Contact info is bold in PDF
+            fontSize: ptToPx(PDF_CONFIG.fonts.body.size),
+            lineHeight: PDF_CONFIG.spacing.lineHeight,
+            color: 'inherit',
+            paddingTop: mmToPx(PDF_CONFIG.margins.top),
+            paddingBottom: mmToPx(PDF_CONFIG.margins.bottom),
+            paddingLeft: mmToPx(PDF_CONFIG.margins.left),
+            paddingRight: mmToPx(PDF_CONFIG.margins.right),
+          }}
+        >
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: mmToPx(PDF_CONFIG.spacing.afterContact) }}> {/* Adjusted margin-bottom */}
+            <h1 style={{
+              fontSize: ptToPx(PDF_CONFIG.fonts.name.size),
+              fontWeight: 'bold',
+              letterSpacing: '1pt',
+              marginBottom: mmToPx(PDF_CONFIG.spacing.afterName), // Use afterName spacing
               fontFamily: `${PDF_CONFIG.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif`,
-              marginBottom: mmToPx(PDF_CONFIG.spacing.afterContact), // Use afterContact spacing
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexWrap: 'wrap'
+              textTransform: 'uppercase'
             }}>
-              {contactElements}
-            </div>
-          )}
+              {resumeData.name}
+            </h1>
 
-          <div style={{
-            borderBottomWidth: '0.5pt',
-            borderColor: '#808080', // Consistent gray color
-            height: '1px',
-            margin: '0 auto',
-            width: `${mmToPx(PDF_CONFIG.contentWidth)}px`, // Dynamic width
-          }}></div>
+            {contactElements.length > 0 && (
+              <div style={{
+                fontSize: ptToPx(PDF_CONFIG.fonts.contact.size),
+                fontWeight: 'bold', // Contact info is bold in PDF
+                fontFamily: `${PDF_CONFIG.fontFamily}, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif`,
+                marginBottom: mmToPx(PDF_CONFIG.spacing.afterContact), // Use afterContact spacing
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexWrap: 'wrap'
+              }}>
+                {contactElements}
+              </div>
+            )}
+
+            <div style={{
+              borderBottomWidth: '0.5pt',
+              borderColor: '#808080', // Consistent gray color
+              height: '1px',
+              margin: '0 auto',
+              width: `${mmToPx(PDF_CONFIG.contentWidth)}px`, // Dynamic width
+            }}></div>
+          </div>
+
+          {/* Dynamic sections */}
+          {(Array.isArray(sectionOrder) ? sectionOrder : []).map((sectionName) => renderSection(sectionName))}
         </div>
-
-        {/* Dynamic sections */}
-        {(Array.isArray(sectionOrder) ? sectionOrder : []).map((sectionName) => renderSection(sectionName))}
       </div>
     </div>
   );
